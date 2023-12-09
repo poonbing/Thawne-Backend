@@ -25,15 +25,3 @@ def decrypt_data(encrypted_data, key):
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
     return decrypted_data.decode('utf-8')
-
-user_password = "secure_password"
-user_salt = generate_salt()
-print(f"user salt = {base64.b64encode(user_salt).decode('utf-8')}")
-stored_key = derive_key(user_password, user_salt)
-print(f"key = {stored_key}")
-user_data_to_encrypt = "Sensitive information"
-encrypted_data = encrypt_data(user_data_to_encrypt, stored_key)
-print(f"encrypted data: \n {encrypted_data}")
-stored_key = derive_key(user_password, user_salt)
-decrypted_data = decrypt_data(encrypted_data, stored_key)
-print(f"Decrypted Data: {decrypted_data}")
