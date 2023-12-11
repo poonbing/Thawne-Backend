@@ -4,9 +4,10 @@ from Crypto.Random import get_random_bytes
 import hashlib
 import os
 import base64
+import bcrypt
 
 def generate_salt():
-    return os.urandom(16)
+    return bcrypt.gensalt()
 
 def derive_key(password, salt, iterations=100000, key_length=32, hash_algorithm='sha256'):
     key = hashlib.pbkdf2_hmac(hash_algorithm, password.encode('utf-8'), salt, iterations, dklen=key_length)

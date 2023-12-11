@@ -7,8 +7,8 @@ from app import db
 def login_check(user_id, password):
     try:
         user_data = db.child('users').child(user_id).get().val()
-        salt = user_data["user_id"][8:]
-        if user_data and user_data["key"] == bcrypt.hashpw(password.encode('utf-8'), salt):
+        salt = bytes(user_data["user_id"][8:], encoding='utf-8')
+        if user_data and user_data["key"] == str(bcrypt.hashpw(password.encode('utf-8'), salt), encoding='utf-8'):
             if user_data["status"] == "Enabled":
                 return True, user_data.get('chats', {})
             elif user_data["status"] == "Disabled":
@@ -53,7 +53,7 @@ def get_top_messages(user_id, chat_id, security_level, password, message_count):
         return False, status
 
 def save_message(user_id, chat_id, security_level, password, message_content):
-    timestamp = int(datetime.utcnow().timestamp()*1000)
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if check:
         access = check_user_access(user_id, chat_id)
@@ -109,26 +109,34 @@ def augment_user_chat_permission(user_id, subject_user_id, chat_id, keyword, sta
         else:
             return False, f"You do not have permissions to alter {keyword} permission of accounts."
     
-def create_chat(user_id, chat_name, chat_description, chat_id, security_level, list_of_users, general_read, general_write):
-    timestamp = int(datetime.utcnow().timestamp()*1000)
+def create_chat(user_id, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True):
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    chat_id = str(uuid.uuid4())[:12]
     user_level = db.child("users").child(user_id).child("level").get().val()
-    # if user_level == "admin":
-    if security_level == "Open":
-        password = ""
+    if user_level == "admin":
+        if security_level == "Open":
+            password = ""
+        else:
+            return False, "User does not have permissions to create Sensitive or Top Secret chats."
+    elif user_level == "master":
+        if security_level == "Open":
+            password = ""
+        else:
+            password = str(uuid.uuid4())[:12]
     else:
-        password = str(uuid.uuid4())[:12]
+        return False, "User does not have permissions to create chats."
+    creator = db.child("users").child(user_id).get().val()["username"]
     db.child("chats").update(
-        {chat_id:{security_level:{password:{"members": list_of_users,"chat_history": {},"message_count":0},}},"chat_name":chat_name, "creation_date":timestamp, "chat_description":chat_description})
-    for user_id in list_of_users:
-        chats = db.child("users").child(user_id).child("chats").get().val()
+            {chat_id:{security_level:{password:{"members": list_of_users,"chat_history": {},"message_count":0},},"chat_name":chat_name, "creation_date":timestamp, "chat_description":chat_description, "creator":creator}})
+    list_of_users.append(user_id)
+    for user in list_of_users:
+        chats = db.child("users").child(user).child("chats").get().val()
         chats[chat_id] = {"security level":security_level, "access":{"read":general_read, "write":general_write}}
-        db.child("users").child(user_id).child("chats").update(chats)
+        db.child("users").child(user).child("chats").update(chats)
     if security_level == "Open":
-        return True, f"{chat_id} has been created. The security level is {security_level}."
+        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
     else:
-        return True, f"{chat_id} has been created. The security level is {security_level}. The following is the password: {password}"
-    # else:
-    #     return False, "User does not have permissions to create chats."
+        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
 
 def mass_user_creation(dictionary):
     result = {"username":{"user id":"password"}}
@@ -136,9 +144,9 @@ def mass_user_creation(dictionary):
         user_id = str(uuid.uuid4())[:8]
         salt = generate_salt()
         password = dictionary[name]["password"]
-        key = bcrypt.hashpw(password.encode('utf-8'), salt)
+        key = str(bcrypt.hashpw(password.encode('utf-8'), salt), encoding='utf-8')
         entry = {
-            "user_id":user_id+salt,
+            "user_id":user_id+str(salt, encoding='utf-8'),
             "username":name,
             "key":key,
             "email":dictionary[name]["email"],

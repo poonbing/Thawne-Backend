@@ -1,39 +1,18 @@
 import uuid
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-import hashlib
-import os
-import base64
+from datetime import datetime
+from cryptography import *
+import pyrebase
 
-def generate_salt():
-    return os.urandom(16)
+firebase_config = {
+    "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
+    "authDomain": "thawne-d1541.firebaseapp.com",
+    "databaseURL": "https://thawne-d1541-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "projectId": "thawne-d1541",
+    "storageBucket": "thawne-d1541.appspot.com",
+    "messagingSenderId": "101144409530",
+    "appId": "1:101144409530:web:4f2663a71c5c204b4c5983",
+    "measurementId": "G-N2NEVEDM49"
+}
 
-def derive_key(password, salt, iterations=100000, key_length=32, hash_algorithm='sha256'):
-    key = hashlib.pbkdf2_hmac(hash_algorithm, password.encode('utf-8'), salt, iterations, dklen=key_length)
-    return key
-
-def encrypt_data(data, key):
-    cipher = AES.new(key, AES.MODE_GCM)
-    ciphertext, tag = cipher.encrypt_and_digest(data.encode('utf-8'))
-    return cipher.nonce + tag + ciphertext
-
-def decrypt_data(encrypted_data, key):
-    nonce = encrypted_data[:16]
-    tag = encrypted_data[16:32]
-    ciphertext = encrypted_data[32:]
-
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-    decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
-    return decrypted_data.decode('utf-8')
-
-user_password = "secure_password"
-user_salt = generate_salt()
-print(f"user salt = {base64.b64encode(user_salt).decode('utf-8')}")
-stored_key = derive_key(user_password, user_salt)
-print(f"key = {stored_key}")
-user_data_to_encrypt = "Sensitive information"
-encrypted_data = encrypt_data(user_data_to_encrypt, stored_key)
-print(f"encrypted data: \n {encrypted_data}")
-stored_key = derive_key(user_password, user_salt)
-decrypted_data = decrypt_data(encrypted_data, stored_key)
-print(f"Decrypted Data: {decrypted_data}")
+firebase = pyrebase.initialize_app(firebase_config)
+db = firebase.database()
