@@ -2,7 +2,7 @@ user = {"users": {
     "john_doe": {
         "user_id":"john_doe+salt",
         "username": "john_doe",
-        "key": "bytes",
+        "password": "bytes",
         "email": "john@example.com",
         "level":"admin",
         "status":"Enabled",
@@ -28,6 +28,7 @@ user = {"users": {
     "jane_smith":{
         "user_id": "jane_smith+salt",
         "password": "secret456",
+        "username" :"Jane_bald",
         "email": "jane@example.com",
         "level":"user",
         "status":"Disabled",
@@ -80,3 +81,10 @@ chats = {"chat_id":{"security level":{"password":{
   "chat_description":"description"
 }
 
+{
+    "username":{
+        "email":"email",
+        "level":"level",
+        "password":"password"
+    }
+}

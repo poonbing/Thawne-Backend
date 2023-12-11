@@ -112,23 +112,23 @@ def augment_user_chat_permission(user_id, subject_user_id, chat_id, keyword, sta
 def create_chat(user_id, chat_name, chat_description, chat_id, security_level, list_of_users, general_read, general_write):
     timestamp = int(datetime.utcnow().timestamp()*1000)
     user_level = db.child("users").child(user_id).child("level").get().val()
-    if user_level == "admin":
-        if security_level == "Open":
-            password = ""
-        else:
-            password = str(uuid.uuid4())[:12]
-        db.child("chats").update(
-            {chat_id:{security_level:{password:{"members": list_of_users,"chat_history": {},"message_count":0},}},"chat_name":chat_name, "creation_date":timestamp, "chat_description":chat_description})
-        for user_id in list_of_users:
-            chats = db.child("users").child(user_id).child("chats").get().val()
-            chats[chat_id] = {"security level":security_level, "access":{"read":general_read, "write":general_write}}
-            db.child("users").child(user_id).child("chats").update(chats)
-        if security_level == "Open":
-            return True, f"{chat_id} has been created. The security level is {security_level}."
-        else:
-            return True, f"{chat_id} has been created. The security level is {security_level}. The following is the password: {password}"
+    # if user_level == "admin":
+    if security_level == "Open":
+        password = ""
     else:
-        return False, "User does not have permissions to create chats."
+        password = str(uuid.uuid4())[:12]
+    db.child("chats").update(
+        {chat_id:{security_level:{password:{"members": list_of_users,"chat_history": {},"message_count":0},}},"chat_name":chat_name, "creation_date":timestamp, "chat_description":chat_description})
+    for user_id in list_of_users:
+        chats = db.child("users").child(user_id).child("chats").get().val()
+        chats[chat_id] = {"security level":security_level, "access":{"read":general_read, "write":general_write}}
+        db.child("users").child(user_id).child("chats").update(chats)
+    if security_level == "Open":
+        return True, f"{chat_id} has been created. The security level is {security_level}."
+    else:
+        return True, f"{chat_id} has been created. The security level is {security_level}. The following is the password: {password}"
+    # else:
+    #     return False, "User does not have permissions to create chats."
 
 def mass_user_creation(dictionary):
     result = {"username":{"user id":"password"}}
@@ -149,3 +149,6 @@ def mass_user_creation(dictionary):
         db.child("users").child(name).update(entry)
         result[name] = {user_id:password}
     return True, result
+
+
+
