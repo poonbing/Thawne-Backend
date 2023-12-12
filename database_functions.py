@@ -80,10 +80,6 @@ def save_message(user_id, chat_id, security_level, password, message_content):
     else:
         return False, status
 
-def get_all_chat(user_id):
-    chat_list = db.child("users").child(user_id).child("chats").get().val()
-    return chat_list
-
 def augment_user(user_id, subject_user_id, keyword):
     if keyword in ["Enabled", "Disabled"]:
         user_level = db.child("users").child(user_id).child("level").get().val()
