@@ -172,3 +172,73 @@ def reflect_all_chats(user_id):
     else:
         return False, "Error in retrieving chats"
 
+def remove_user_from_chat(user_id, chat_id, security_level, password, removed_user_id):
+    user_level = db.child("users").child(user_id).get().val()["level"]
+    target_user = db.child("users").child(removed_user_id).get().val()
+    if user_level == "admin" and target_user["level"] == "user":
+        pass
+    elif user_level == "master" and target_user["level"] == "admin" or "user":
+        pass
+    elif user_level == "admin" and target_user["level"] == "admin" or "master":
+        return False, "User cannot remove another user of the same or higher permission level."
+    else:
+        return False, "User does not have permission to remove users."
+    chat_members = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val()
+    for item in chat_members:
+        if chat_members[item] == removed_user_id:
+            chat_members.pop(item)
+    db.child("chats").child(chat_id).child(security_level).child(password).child("members").set(chat_members)
+    target_chats = target_user["chats"]
+    target_chats.pop(chat_id)
+    db.child("users").child(removed_user_id).child("chats").set(target_chats)
+    return True, "User is removed from the chat successfully."
+
+def delete_chat(user_id, chat_id, security_level, password):
+    target_chat = db.child("chats").child(chat_id).child(security_level).get().val()
+    if target_chat[password]:
+        if target_chat["creator"] == user_id:
+            pass
+        elif db.child("users").child(user_id).get().val()["level"] == "master":
+            pass
+        else:
+            return False, "User cannot delete the chat"
+        member_list = target_chat[password]["members"]
+        for item in member_list:
+            db.child("users").child(item).child("chats").child(chat_id).remove()
+        db.child("chats").child(chat_id).remove()
+        return True, "Chat has been deleted successfully"
+        
+def delete_user(user_id, removed_user_id):
+    user_level = db.child("users").child(user_id).get().val()["level"]
+    target_user = db.child("users").child(removed_user_id).get().val()
+    if user_level == "master":
+        db.child("users").child(removed_user_id).remove()
+        for chat_id in target_user["chats"]:
+            chat = db.child("chats").child(chat_id).child(target_user["chats"][chat_id]["security level"]).get().val()
+            for chat_password in chat:
+                member_list = db.child("chats").child(chat_id).child(target_user["chats"][chat_id]["security level"]).child(chat_password).child("members").get().val()
+                for users in member_list:
+                    if member_list[users] == removed_user_id:
+                        member_list.pop(users)
+                db.child("chats").child(chat_id).child(target_user["chats"][chat_id]["security level"]).child(chat_password).child("members").set(member_list)
+        return True, "User have been deleted successfully."
+    elif user_level == target_user["level"]:
+        return False, "User cannot delete another user of the same permission level."
+    else:
+        return False, "User does not have permission to delete users."
+
+def obtain_chat_details(chat_id, security_level, password):
+    member_list = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val()
+    members = {}
+    for user in member_list:
+        username = db.child("users").child(member_list[user]).child("username").get().val()
+        members[username] = "Member"
+    chat_info = db.child("chats").child(chat_id).child(security_level).get().val()
+    members[chat_info["creator"]] = "Creator"
+    return_dict = {
+        "chat_name":chat_info["chat_name"],
+        "chat_description":chat_info["chat_description"],
+        "creation_date":chat_info["creation_date"],
+        "members":member_list
+    }
+    return True, return_dict
