@@ -16,3 +16,19 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
+
+def reflect_all_chats(user_id):
+    return_dict = {}
+    user_chats = db.child("users").child(user_id).child("chats").get().val()
+    chats = db.child("chats").get().val()
+    if user_chats and chats:
+        for chat_id in user_chats:
+            chat_name = chats[chat_id]["chat_name"]
+            chat_level = user_chats[chat_id]["security level"]
+            return_dict[chat_name] = {chat_level:chat_id}
+        return True, return_dict
+    else:
+        return False, "Error in retrieving chats"
+
+status, statement = reflect_all_chats("6cc260f0")
+print(statement)

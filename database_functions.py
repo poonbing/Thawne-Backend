@@ -14,7 +14,7 @@ def login_check(user_id, password):
             elif user_data["status"] == "Disabled":
                 return False, "User has been Disabled."
         else:
-            return False, "Incorrect Password."
+            return False, "Incorrect Username or Password."
     except:
         return False, "User does not exist."
 
@@ -62,10 +62,11 @@ def save_message(user_id, chat_id, security_level, password, message_content):
             new_message_id = chat_id+new_message_count
             if password != "":
                 message_content = encrypt_data(message_content, password)
+            user = db.child("users").child(user_id).get().val()
             new_message = {
                 "id":new_message_id,
                 "date":timestamp,
-                "sent_from":user_id,
+                "sent_from":{user_id:user["username"]},
                 "content":message_content
             }
             try:
@@ -158,5 +159,16 @@ def mass_user_creation(dictionary):
         result[name] = {user_id:password}
     return True, result
 
-
+def reflect_all_chats(user_id):
+    return_dict = {}
+    user_chats = db.child("users").child(user_id).child("chats").get().val()
+    chats = db.child("chats").get().val()
+    if user_chats and chats:
+        for chat_id in user_chats:
+            chat_name = chats[chat_id]["chat_name"]
+            chat_level = user_chats[chat_id]["security level"]
+            return_dict[chat_name] = {chat_level:chat_id}
+        return True, return_dict
+    else:
+        return False, "Error in retrieving chats"
 
