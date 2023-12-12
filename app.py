@@ -1,4 +1,4 @@
-from flask import *
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from database_functions import *
 import pyrebase
@@ -28,11 +28,13 @@ db = firebase.database()
 def home():
     return render_template('index.html')
 
-@app.route('/login',methods = ['POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    user_id = request.form['uid']
-    password = request.form['pass']
-    login_check(user_id = user_id,password = password)
+    # user_id = request.form['uid']
+    # password = request.form['pass']
+    # login_check(user_id = user_id,password = password)
+    return jsonify({"token":"test123"})
+
 
 @app.route('/verifychatuser',methods = ['GET'])
 def verify_user():
