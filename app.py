@@ -16,93 +16,124 @@ firebase_config = {
     "storageBucket": "thawne-d1541.appspot.com",
     "messagingSenderId": "101144409530",
     "appId": "1:101144409530:web:4f2663a71c5c204b4c5983",
-    "measurementId": "G-N2NEVEDM49"
+    "measurementId": "G-N2NEVEDM49",
 }
 
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
+storage = firebase.storage()
 
 
-
-@app.route('/',methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route("/login", methods=["GET", "POST"])
+
+@app.route("/login", methods=["POST"])
 def login():
-    # user_id = request.form['uid']
-    # password = request.form['pass']
+    data = request.get_json()
+
+    print(data)
+
+    if "username" in data and "password" in data:
+        username = data["username"]
+        password = data["password"]
+
     # login_check(user_id = user_id,password = password)
-    return jsonify({"token":"test123"})
+    return jsonify({"token": "test123"})
 
 
-@app.route('/verifychatuser',methods = ['GET'])
+@app.route("/verifychatuser", methods=["GET"])
 def verify_user():
-    user_id = request.args.get('uid')
-    chat_id = request.args.get('cid')
-    security_level = request.args.get('seclvl')
-    password = request.args.get('pass')
-    verify_chat_user(user_id = user_id , chat_id = chat_id , security_level = security_level , password = password)
+    user_id = request.args.get("uid")
+    chat_id = request.args.get("cid")
+    security_level = request.args.get("seclvl")
+    password = request.args.get("pass")
+    verify_chat_user(
+        user_id=user_id,
+        chat_id=chat_id,
+        security_level=security_level,
+        password=password,
+    )
 
 
-@app.route('/check_user_access',methods = ['GET'])
+@app.route("/check_user_access", methods=["GET"])
 def check_user_access():
-    user_id = request.args.get('uid')
-    chat_id = request.args.get('cid')
-    check_user_access(user_id = user_id, chat_id = chat_id)
+    user_id = request.args.get("uid")
+    chat_id = request.args.get("cid")
+    check_user_access(user_id=user_id, chat_id=chat_id)
 
 
-@app.route('/gettopmessages',methods = ['GET'])
+@app.route("/gettopmessages", methods=["GET"])
 def get_top_messages():
-    user_id = request.args.get('uid')
-    chat_id = request.args.get('cid')
-    security_level = request.args.get('seclvl')
-    password = request.args.get('pass')
-    message_count = request.args.get('msgc')
-    get_top_messages(user_id = user_id,chat_id = chat_id, security_level = security_level, password = password, message_count = message_count)
+    user_id = request.args.get("uid")
+    chat_id = request.args.get("cid")
+    security_level = request.args.get("seclvl")
+    password = request.args.get("pass")
+    message_count = request.args.get("msgc")
+    get_top_messages(
+        user_id=user_id,
+        chat_id=chat_id,
+        security_level=security_level,
+        password=password,
+        message_count=message_count,
+    )
 
 
-
-
-@app.route('/submitmessage',methods = ['POST'])
+@app.route("/submitmessage", methods=["POST"])
 def save_message():
-    user_id = request.form['uid']
-    chat_id = request.form['cid']
-    security_level = request.form['seclvl']
-    password = request.form['pass']
-    message_content = request.form['msgcont']
+    user_id = request.form["uid"]
+    chat_id = request.form["cid"]
+    security_level = request.form["seclvl"]
+    password = request.form["pass"]
+    message_content = request.form["msgcont"]
 
-    save_message(user_id = user_id, chat_id = chat_id,security_level = security_level, password = password, message_content = message_content)
+    save_message(
+        user_id=user_id,
+        chat_id=chat_id,
+        security_level=security_level,
+        password=password,
+        message_content=message_content,
+    )
 
 
-@app.route('/getallchat',methods = ['GET'])
+@app.route("/getallchat", methods=["GET"])
 def get_all_chat():
-    user_id = request.form['uid']
-    get_all_chat(user_id = user_id)
+    user_id = request.form["uid"]
+    get_all_chat(user_id=user_id)
 
     return 200
 
-@app.route('/augmentuser',methods = ['POST'])
+
+@app.route("/augmentuser", methods=["POST"])
 def augment_user():
-    user_id = request.form['uid']
-    subject_user_id = request.form['subuid']
-    keyword = request.form['key']
-    augment_user(user_id = user_id, subject_user_id = subject_user_id, keyword = keyword)
+    user_id = request.form["uid"]
+    subject_user_id = request.form["subuid"]
+    keyword = request.form["key"]
+    augment_user(user_id=user_id, subject_user_id=subject_user_id, keyword=keyword)
 
     return 200
 
-@app.route('/augmentuserchatpermission',methods = ['POST'])
+
+@app.route("/augmentuserchatpermission", methods=["POST"])
 def augment_user_chat_permission():
-    user_id = request.form['uid']
-    subject_user_id = request.form['subuid']
-    chat_id = request.form['cid']
-    keyword = request.form['key']
-    status = request.form['status']
-    augment_user(user_id = user_id, subject_user_id = subject_user_id,chat_id = chat_id, keyword = keyword,status = status)
+    user_id = request.form["uid"]
+    subject_user_id = request.form["subuid"]
+    chat_id = request.form["cid"]
+    keyword = request.form["key"]
+    status = request.form["status"]
+    augment_user(
+        user_id=user_id,
+        subject_user_id=subject_user_id,
+        chat_id=chat_id,
+        keyword=keyword,
+        status=status,
+    )
 
     return 200
 
-@app.route('/createchat',methods = ['POST'])
+
+@app.route("/createchat", methods=["POST"])
 def createChat():
     data = request.get_json()
 
@@ -123,7 +154,5 @@ def createChat():
     
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
