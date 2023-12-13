@@ -104,29 +104,23 @@ def augment_user_chat_permission():
 
 @app.route('/createchat',methods = ['POST'])
 def createChat():
-    user_id = request.form['uid']
-    chat_id = request.form['cid']
-    chat_description = request.form['cds']
-    chat_name = request.form['chnm']
-    security_level = request.form['seclvl']
-    list_of_users = request.form['lou']
-    general_read = request.form['grd']
-    general_write = request.form['gwr']
-    
-    status, data = create_chat(user_id=user_id, chat_name=chat_name, chat_description=chat_description, chat_id=chat_id, security_level=security_level, list_of_users=list_of_users,  general_read=True, general_write=True)
-    if status:
-        data = {
-        'user_id': user_id,
-        'chat_id': chat_id,
-        'chat_description': chat_description,
-        'chat_name': chat_name,
-        'security_level': security_level,
-        'list_of_users': list_of_users,
-        'general_read': general_read,
-        'general_write': general_write
-        }
+    data = request.get_json()
 
-    return jsonify(data)
+    print(data)
+
+    userId = data["userId"]
+    chatName = data['chatName']
+    chatDescription = data['chatDescription']
+    securityLevel = data['securityLevel']
+    listOfUsers = data['listOfUsers']
+    generalRead = data['generalRead']
+    generalWrite = data['generalWrite']
+    
+    status, msg = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
+    
+
+    return jsonify(msg)
+    
 
 
 
