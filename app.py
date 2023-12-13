@@ -21,6 +21,7 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
+storage = firebase.storage()
 
 
 @app.route("/", methods=["GET", "POST"])

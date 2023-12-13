@@ -59,18 +59,24 @@ chats = {"chat_id":{"security level":{"password":{
           "user_id_3"
         ],
         "chat_history": {
-          "message_id_1": {
+          "message_count_1": {
             "id": "unique_message_id",
             "date": "2023-01-01T12:00:00",
             "sent_from": {"user_id_1":"username"},
             "content": "Hello, how are you?"
           },
-          "message_id_2": {
-            "id": "unique_message_id",
-            "date": "2023-01-01T12:05:00",
-            "sent_from": {"user_id_2":"username"},
-            "content": "I'm good, thanks! How about you?"
-          },
+          "message_count_2": {
+                    "id":"new_message_id",
+                    "date":"timestamp",
+                    "sent_from":{"user_id":"username"},
+                    "content":"message_content",
+                    "file":{
+                        "filename":"filename",
+                        "file_url":"url",
+                        "file_security":"security level",
+                        "file_password":"key"
+                    }
+                },
         },
         "message_count":"count"
       },
