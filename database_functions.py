@@ -2,161 +2,261 @@ from datetime import datetime
 import uuid
 import bcrypt
 from cryptography import *
-from app import db
+from app import db, storage
 
 def login_check(user_id, password):
     try:
         user_data = db.child('users').child(user_id).get().val()
-        salt = bytes(user_data["user_id"][8:], encoding='utf-8')
-        if user_data and user_data["key"] == str(bcrypt.hashpw(password.encode('utf-8'), salt), encoding='utf-8'):
-            if user_data["status"] == "Enabled":
-                return True, user_data.get('chats', {})
-            elif user_data["status"] == "Disabled":
-                return False, "User has been Disabled."
+        if user_data:
+            stored_key = user_data.get("key", "")
+            salt = bytes(user_data.get("user_id", "")[8:], encoding='utf-8')
+            if stored_key == str(bcrypt.hashpw(password.encode('utf-8'), salt), encoding='utf-8'):
+                if user_data.get("status") == "Enabled":
+                    return True, user_data.get('chats', {})
+                elif user_data.get("status") == "Disabled":
+                    return False, "User has been Disabled."
+            else:
+                return False, "Incorrect Username or Password."
         else:
-            return False, "Incorrect Password."
-    except:
-        return False, "User does not exist."
+            return False, "User does not exist."
+    except Exception as e:
+        return False, f"Error during login check: {str(e)}"
 
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
         chat = db.child('chats').child(chat_id).child(security_level).child(password)
+        chat_info = chat.get().val()
+        if not chat_info or "members" not in chat_info:
+            return False, "Incorrect chat information."
         member_list = chat.child("members").get().val()
         if user_id in member_list:
             return True, chat
         else:
-            return False, "User not in chat group."
-    except:
-        return False, "Incorrect chat information."
+            return False, "User not in the chat group."
+    except Exception as e:
+        return False, f"Error verifying chat user: {str(e)}"
 
 def check_user_access(user_id, chat_id):
     user_access = db.child("users").child(user_id).child("chats").child(chat_id).child("access").get().val()
-    return user_access
+    return user_access or {"read": False, "write": False}
 
 def get_top_messages(user_id, chat_id, security_level, password, message_count):
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
-    if check:
-        access = check_user_access(user_id, chat_id)
-        if access["read"]:
-            try:
-                messages = status.child("chat_history").limit_to_last(message_count).get().val()
-            except:
-                messages = status.child("chat_history").get().val()
-            message_list = list(reversed(messages))
-            if password != "":
-                for message_id in message_list:
-                    message_list[message_id]["content"] = decrypt_data(message_list[message_id]["content"], password)
-            return True, message_list
-        else:
-            return False, "User does not have permission to access this chat."
-    else:
+    if not check:
         return False, status
+    access = check_user_access(user_id, chat_id)
+    if not access["read"]:
+        return False, "User does not have permission to access this chat."
+    try:
+        messages = db.child('chats').child(chat_id).child(security_level).child(password).child("chat_history").limit_to_last(message_count).get().val() or {}
+    except:
+        messages = status.child("chat_history").get().val() or {}
+    message_list = list(reversed(messages))
+    if password != "":
+        for message_id, message_data in message_list.items():
+            message_data["content"] = decrypt_data(message_data["content"], password)
+    return True, message_list
 
-def save_message(user_id, chat_id, security_level, password, message_content):
+def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
-    if check:
-        access = check_user_access(user_id, chat_id)
-        if access["write"]:
-            new_message_count = str(int(status.child("message_count").get().val())+1).zfill(6)
-            new_message_id = chat_id+new_message_count
-            if password != "":
-                message_content = encrypt_data(message_content, password)
-            new_message = {
-                "id":new_message_id,
-                "date":timestamp,
-                "sent_from":user_id,
-                "content":message_content
-            }
-            try:
-                db.child('chats').child(chat_id).child(security_level).child(password).child("chat_history").push(new_message)
-                db.child('chats').child(chat_id).child(security_level).child(password).child("message_count").update(new_message_count)
-                return True, new_message_id
-            except:
-                return False, "Error in message saving."
-        else:
-            return False, "User does not have permission to send messages in this chat."
-    else:
+    if not check:
         return False, status
-
-def get_all_chat(user_id):
-    chat_list = db.child("users").child(user_id).child("chats").get().val()
-    return chat_list
+    access = check_user_access(user_id, chat_id)
+    if not access["write"]:
+        return False, "User does not have permission to send messages in this chat."
+    try:
+        user = db.child("users").child(user_id).get().val()
+        new_message_count = str(int(status.child("message_count").get().val()) + 1).zfill(6)
+        new_message_id = f"{chat_id}{new_message_count}"
+        if password:
+            message_content = encrypt_data(message_content, password)
+        new_message = {
+            "id": new_message_id,
+            "date": timestamp,
+            "sent_from": {user_id: user["username"]},
+            "content": message_content,
+        }
+        if file:
+            new_message["file"] = {
+                "filename": filename,
+                "file_url": storage.child(filename).get_url(None),
+                "file_security": file_security,
+            }
+            if file_security in ["Top Secret", "Sensitive"]:
+                file_pass = str(uuid.uuid4())[:8]
+                salt = generate_salt()
+                key = str(bcrypt.hashpw(file_pass.encode('utf-8'), salt), encoding='utf-8')
+                new_message["file"]["file_password"] = key
+                storage.child(filename).put(file)
+        with db.batch() as batch:
+            batch.child('chats').child(chat_id).child(security_level).child(password).child("chat_history").child(new_message_count).push(new_message)
+            batch.child('chats').child(chat_id).child(security_level).child(password).child("message_count").update(new_message_count)
+        if file:
+            return True, {new_message_id: {filename: file_pass}}
+        else:
+            return True, new_message_id
+    except Exception as e:
+        print(e)
+        return False, "Error in message saving."
 
 def augment_user(user_id, subject_user_id, keyword):
-    if keyword in ["Enabled", "Disabled"]:
-        user_level = db.child("users").child(user_id).child("level").get().val()
-        if user_level == "admin":
-            subject_user_level = db.child("users").child(subject_user_id).child("level").get().val()
-            if subject_user_level != user_level:
-                db.child("users").child(subject_user_id).child("status").update(keyword)
-                return True, f"{subject_user_id} has been {keyword}."
-            else:
-                return False, f"{subject_user_id} is at the same priviledge level, thus cannot be {keyword}."
-        else:
-            return False, f"You do not have permissions to apply {keyword} to accounts."
+    valid_keywords = ["Enabled", "Disabled"]
+    if keyword not in valid_keywords:
+        return False, f"Invalid keyword: {keyword}"
+    user_level = db.child("users").child(user_id).child("level").get().val()
+    subject_user_level = db.child("users").child(subject_user_id).child("level").get().val()
+    if user_level != "admin":
+        return False, f"You do not have permissions to apply {keyword} to accounts."
+    if subject_user_level == user_level:
+        return False, f"{subject_user_id} is at the same privilege level and cannot be {keyword}."
+    db.child("users").child(subject_user_id).child("status").update(keyword)
+    return True, f"{subject_user_id} has been {keyword}."
         
 def augment_user_chat_permission(user_id, subject_user_id, chat_id, keyword, status):
-    if keyword in ["read", "write"]:
-        user_level = db.child("users").child(user_id).child("level").get().val()
-        if user_level == "admin":
-            subject_user_level = db.child("users").child(subject_user_id).child("level").get().val()
-            if subject_user_level != user_level:
-                db.child("users").child(subject_user_id).child("chats").child(chat_id).child("access").child(keyword).update(status)
-                return True, f"{subject_user_id}'s {keyword} permission to {chat_id} has been changed to {status}."
-            else:
-                return False, f"{subject_user_id} is at the same priviledge level, thus cannot be altered."
-        else:
-            return False, f"You do not have permissions to alter {keyword} permission of accounts."
+    valid_keywords = ["read", "write"]
+    if keyword not in valid_keywords:
+        return False, f"Invalid keyword: {keyword}"
+    user_level = db.child("users").child(user_id).child("level").get().val()
+    subject_user_level = db.child("users").child(subject_user_id).child("level").get().val()
+    if user_level != "admin":
+        return False, f"You do not have permissions to alter {keyword} permission of accounts."
+    if subject_user_level == user_level:
+        return False, f"{subject_user_id} is at the same privilege level and cannot be altered."
+    db.child("users").child(subject_user_id).child("chats").child(chat_id).child("access").child(keyword).update(status)
+    return True, f"{subject_user_id}'s {keyword} permission for {chat_id} has been changed to {status}."
     
 def create_chat(user_id, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     chat_id = str(uuid.uuid4())[:12]
     user_level = db.child("users").child(user_id).child("level").get().val()
-    if user_level == "admin":
-        if security_level == "Open":
-            password = ""
-        else:
-            return False, "User does not have permissions to create Sensitive or Top Secret chats."
-    elif user_level == "master":
-        if security_level == "Open":
-            password = ""
-        else:
-            password = str(uuid.uuid4())[:12]
-    else:
+    if user_level not in ["admin", "master"]:
         return False, "User does not have permissions to create chats."
+    if security_level == "Open":
+        password = ""
+    elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
+        return False, "User does not have permissions to create Sensitive or Top Secret chats."
+    else:
+        password = str(uuid.uuid4())[:12]
     creator = db.child("users").child(user_id).get().val()["username"]
-    db.child("chats").update(
-            {chat_id:{security_level:{password:{"members": list_of_users,"chat_history": {},"message_count":0},},"chat_name":chat_name, "creation_date":timestamp, "chat_description":chat_description, "creator":creator}})
-    list_of_users.append(user_id)
+    chat_data = {
+        chat_id: {
+            security_level: {
+                password: {
+                    "members": list_of_users,
+                    "chat_history": {},
+                    "message_count": 0,
+                },
+            },
+            "chat_name": chat_name,
+            "creation_date": timestamp,
+            "chat_description": chat_description,
+            "creator": creator,
+        }
+    }
+    db.child("chats").update(chat_data)
     for user in list_of_users:
-        chats = db.child("users").child(user).child("chats").get().val()
-        chats[chat_id] = {"security level":security_level, "access":{"read":general_read, "write":general_write}}
-        db.child("users").child(user).child("chats").update(chats)
+        user_chats = db.child("users").child(user).child("chats").get().val() or {}
+        user_chats[chat_id] = {"security level": security_level, "access": {"read": general_read, "write": general_write}}
+        db.child("users").child(user).child("chats").update(user_chats)
     if security_level == "Open":
         return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
     else:
         return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
 
-def mass_user_creation(dictionary):
-    result = {"username":{"user id":"password"}}
-    for name in dictionary:
+def mass_user_creation(user_data):
+    result = {"username": {"user id": "password"}}
+    for name, data in user_data.items():
         user_id = str(uuid.uuid4())[:8]
         salt = generate_salt()
-        password = dictionary[name]["password"]
+        password = data["password"]
         key = str(bcrypt.hashpw(password.encode('utf-8'), salt), encoding='utf-8')
         entry = {
-            "user_id":user_id+str(salt, encoding='utf-8'),
-            "username":name,
-            "key":key,
-            "email":dictionary[name]["email"],
-            "level":dictionary[name]["level"],
-            "status":"Enabled",
-            "chats":{}
+            "user_id": user_id + str(salt, encoding='utf-8'),
+            "username": name,
+            "key": key,
+            "email": data["email"],
+            "level": data["level"],
+            "status": "Enabled",
+            "chats": {}
         }
         db.child("users").child(name).update(entry)
-        result[name] = {user_id:password}
+        result[name] = {user_id: password}
     return True, result
 
+def reflect_all_chats(user_id):
+    return_dict = {}
+    user_chats = db.child("users").child(user_id).child("chats").get().val()
+    chats = db.child("chats").get().val()
+    if user_chats and chats:
+        for chat_id, chat_info in user_chats.items():
+            chat_data = chats.get(chat_id, {})
+            chat_name = chat_data.get("chat_name", "")
+            chat_level = chat_info.get("security level", "")
+            return_dict[chat_name] = {chat_level: chat_id}
+        return True, return_dict
+    else:
+        return False, "Error in retrieving chats"
 
+def remove_user_from_chat(user_id, chat_id, security_level, password, removed_user_id):
+    user_levels = {"master": 1, "admin": 2, "user": 3}
+    user_level = db.child("users").child(user_id).child("level").get().val()
+    target_user_level = db.child("users").child(removed_user_id).child("level").get().val()
+    if user_levels.get(user_level, 0) < user_levels.get(target_user_level, 0):
+        return False, "User does not have permission to remove users."
+    chat_members = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val()
+    chat_members = {item: user_id for item, member_id in chat_members.items() if member_id != removed_user_id}
+    db.child("chats").child(chat_id).child(security_level).child(password).child("members").set(chat_members)
+    target_chats = db.child("users").child(removed_user_id).child("chats").get().val() or {}
+    target_chats.pop(chat_id, None)
+    db.child("users").child(removed_user_id).child("chats").set(target_chats)
+    return True, "User is removed from the chat successfully."
 
+def delete_chat(user_id, chat_id, security_level, password):
+    target_chat = db.child("chats").child(chat_id).child(security_level).get().val()
+    if not target_chat or not target_chat.get(password):
+        return False, "Invalid chat or password."
+    user_level = db.child("users").child(user_id).child("level").get().val()
+    if target_chat["creator"] != user_id and user_level != "master":
+        return False, "User cannot delete the chat."
+    member_list = target_chat.get(password, {}).get("members", [])
+    for member_id in member_list:
+        db.child("users").child(member_id).child("chats").child(chat_id).remove()
+    db.child("chats").child(chat_id).remove()
+    return True, "Chat has been deleted successfully"
+        
+def delete_user(user_id, removed_user_id):
+    user_level = db.child("users").child(user_id).child("level").get().val()
+    target_user = db.child("users").child(removed_user_id).get().val()
+    if not target_user:
+        return False, "Invalid user."
+    if user_level == "master":
+        db.child("users").child(removed_user_id).remove()
+        for chat_id, chat_info in target_user.get("chats", {}).items():
+            security_level = chat_info.get("security level", "")
+            for chat_password in db.child("chats").child(chat_id).child(security_level).get().val() or {}:
+                member_list = db.child("chats").child(chat_id).child(security_level).child(chat_password).child("members").get().val() or {}
+                member_list = {uid: uname for uid, uname in member_list.items() if uid != removed_user_id}
+                db.child("chats").child(chat_id).child(security_level).child(chat_password).child("members").set(member_list)
+        return True, "User has been deleted successfully."
+    elif user_level == target_user.get("level"):
+        return False, "User cannot delete another user of the same permission level."
+    else:
+        return False, "User does not have permission to delete users."
+
+def obtain_chat_details(chat_id, security_level, password):
+    member_list = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val() or {}
+    members = {}
+    for user_id, role in member_list.items():
+        username = db.child("users").child(user_id).child("username").get().val()
+        members[username] = "Member"
+    chat_info = db.child("chats").child(chat_id).child(security_level).get().val() or {}
+    creator_username = db.child("users").child(chat_info.get("creator", "")).child("username").get().val()
+    members[creator_username] = "Creator"
+    return_dict = {
+        "chat_name": chat_info.get("chat_name", ""),
+        "chat_description": chat_info.get("chat_description", ""),
+        "creation_date": chat_info.get("creation_date", ""),
+        "members": members
+    }
+    return True, return_dict
