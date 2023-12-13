@@ -35,11 +35,16 @@ def login():
     print(data)
 
     if "username" in data and "password" in data:
-        username = data["username"]
+        user_id = data["username"]
         password = data["password"]
 
-    # login_check(user_id = user_id,password = password)
-    return jsonify({"token": "test123"})
+    result, message = login_check(user_id, password)
+    print(result)
+
+    if result:
+        return jsonify({"token": user_id})
+    else:
+        return jsonify({"error": message})
 
 
 @app.route("/verifychatuser", methods=["GET"])
