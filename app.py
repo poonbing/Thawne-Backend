@@ -54,35 +54,42 @@ def verify_user():
     chat_id = request.args.get("cid")
     security_level = request.args.get("seclvl")
     password = request.args.get("pass")
-    verify_chat_user(
+    state, message = verify_chat_user(
         user_id=user_id,
         chat_id=chat_id,
         security_level=security_level,
         password=password,
     )
+    if state:
+        return jsonify({"token":message})
+    return jsonify({"error":message})
 
 
 @app.route("/check_user_access", methods=["GET"])
 def check_user_access():
     user_id = request.args.get("uid")
     chat_id = request.args.get("cid")
-    check_user_access(user_id=user_id, chat_id=chat_id)
+    access = check_user_access(user_id=user_id, chat_id=chat_id)
+    return jsonify(access)
 
 
 @app.route("/gettopmessages", methods=["GET"])
-def get_top_messages():
+def GetTopMessages():
     user_id = request.args.get("uid")
     chat_id = request.args.get("cid")
     security_level = request.args.get("seclvl")
     password = request.args.get("pass")
     message_count = request.args.get("msgc")
-    get_top_messages(
+    state, message = get_top_messages(
         user_id=user_id,
         chat_id=chat_id,
         security_level=security_level,
         password=password,
         message_count=message_count,
     )
+    if state:
+        return jsonify({"message list":message})
+    return jsonify({"error":message})
 
 
 @app.route("/submitmessage", methods=["POST"])
@@ -92,22 +99,46 @@ def save_message():
     security_level = request.form["seclvl"]
     password = request.form["pass"]
     message_content = request.form["msgcont"]
-
-    save_message(
-        user_id=user_id,
-        chat_id=chat_id,
-        security_level=security_level,
-        password=password,
-        message_content=message_content,
-    )
+    try:
+        file = request.form["file"]
+        filename = request.form["filename"]
+        file_security = request.form["file security"]
+        state, message = save_message(
+            user_id=user_id,
+            chat_id=chat_id,
+            security_level=security_level,
+            password=password,
+            message_content=message_content,
+            file=file,
+            filename=filename,
+            file_security=file_security
+        )
+    except:
+        state, message = save_message(
+            user_id=user_id,
+            chat_id=chat_id,
+            security_level=security_level,
+            password=password,
+            message_content=message_content,
+        )
+    if state:
+        state, message = get_top_messages(
+            user_id=user_id,
+            chat_id=chat_id,
+            security_level=security_level,
+            password=password,
+        )
+        return jsonify({"message_id":message})
+    return jsonify({"error":message})
 
 
 @app.route("/getallchat", methods=["GET"])
 def get_all_chat():
     user_id = request.form["uid"]
-    get_all_chat(user_id=user_id)
-
-    return 200
+    state, message = reflect_all_chats(user_id=user_id)
+    if state:
+        return jsonify({"chat list":message})
+    return jsonify({"error":message})
 
 
 @app.route("/augmentuser", methods=["POST"])
@@ -115,9 +146,10 @@ def augment_user():
     user_id = request.form["uid"]
     subject_user_id = request.form["subuid"]
     keyword = request.form["key"]
-    augment_user(user_id=user_id, subject_user_id=subject_user_id, keyword=keyword)
-
-    return 200
+    state, message = augment_user(user_id=user_id, subject_user_id=subject_user_id, keyword=keyword)
+    if state:
+        return jsonify({"success":message})
+    return jsonify({"error":message})
 
 
 @app.route("/augmentuserchatpermission", methods=["POST"])
@@ -127,15 +159,16 @@ def augment_user_chat_permission():
     chat_id = request.form["cid"]
     keyword = request.form["key"]
     status = request.form["status"]
-    augment_user(
+    state, message = augment_user_chat_permission(
         user_id=user_id,
         subject_user_id=subject_user_id,
         chat_id=chat_id,
         keyword=keyword,
         status=status,
     )
-
-    return 200
+    if state:
+        return jsonify({"success":message})
+    return jsonify({"error":message})
 
 
 @app.route("/createchat", methods=["POST"])
@@ -152,10 +185,11 @@ def createChat():
     generalRead = data['generalRead']
     generalWrite = data['generalWrite']
     
-    status, msg = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
-    
-
-    return jsonify(msg)
+    state, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
+    if state:
+        #_ , message = reflect_all_chats(user_id=userId)
+        return jsonify({"success":message})
+    return jsonify({"error":message})
     
 
 
