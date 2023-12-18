@@ -43,9 +43,9 @@ def login():
     print(result)
 
     if result:
-        return jsonify({"token": user_id})
+        return jsonify(user_id)
     else:
-        return jsonify({"error": message})
+        return jsonify(message)
 
 
 @app.route("/verifychatuser", methods=["GET"])
@@ -61,8 +61,8 @@ def verify_user():
         password=password,
     )
     if state:
-        return jsonify({"token":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/check_user_access", methods=["GET"])
@@ -88,8 +88,8 @@ def GetTopMessages():
         message_count=message_count,
     )
     if state:
-        return jsonify({"message list":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/submitmessage", methods=["POST"])
@@ -128,8 +128,8 @@ def save_message():
             security_level=security_level,
             password=password,
         )
-        return jsonify({"message_id":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/getallchat", methods=["GET"])
@@ -137,8 +137,8 @@ def get_all_chat():
     user_id = request.form["uid"]
     state, message = reflect_all_chats(user_id=user_id)
     if state:
-        return jsonify({"chat list":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/augmentuser", methods=["POST"])
@@ -148,8 +148,8 @@ def augment_user():
     keyword = request.form["key"]
     state, message = augment_user(user_id=user_id, subject_user_id=subject_user_id, keyword=keyword)
     if state:
-        return jsonify({"success":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/augmentuserchatpermission", methods=["POST"])
@@ -167,8 +167,8 @@ def augment_user_chat_permission():
         status=status,
     )
     if state:
-        return jsonify({"success":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
 
 
 @app.route("/createchat", methods=["POST"])
@@ -188,8 +188,8 @@ def createChat():
     state, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
     if state:
         #_ , message = reflect_all_chats(user_id=userId)
-        return jsonify({"success":message})
-    return jsonify({"error":message})
+        return jsonify(message)
+    return jsonify(message)
     
 
 
