@@ -4,6 +4,7 @@ from database_functions import *
 import pyrebase
 
 
+
 app = Flask(__name__)
 CORS(app)
 
@@ -132,7 +133,7 @@ def save_message():
     return jsonify(message)
 
 
-@app.route("/getallchat", methods=["GET"])
+@app.route("/getallchat", methods=["GET", "POST"])
 def get_all_chat():
     user_id = request.form["uid"]
     state, message = reflect_all_chats(user_id=user_id)

@@ -97,3 +97,48 @@ chats = {"chat_id":{"security level":{"password":{
     }
 }
 
+
+chat_data = {
+    "chat_id" : "",
+    "chat_name": "",
+    "chat_description": "",
+    "security_level": "",
+    "password": "",
+    "members": [],
+    "general_read": True,
+    "general_write": True,
+    "chat_history": [
+        {       
+            "message_id": "",
+            "date": "",
+            "sender": "",
+            "content": "",
+            "file": {   #file values can be false => user didnt upload file
+                "file_name": "",
+                "file_url":"url",
+                "file_security":"security level",
+                "file_password":"key"
+            } 
+        }  #each dict in list represent one message sent
+    ],
+    "message_count": "",  #chat_history length since its an list
+    "date_created": "",
+    "created_by": ""
+}
+
+
+users = {
+    "user_id": "",
+    "username": "",
+    "email": "",
+    "password": "",
+    "security_token": "", #Standard, Admin, Master
+    "status": False,  #will be true once password to chat if verified
+    "chats": [
+        {
+            "chat_id": "",
+            "chat_name": "",
+            "security_level": ""
+        }
+    ],
+}

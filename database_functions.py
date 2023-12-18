@@ -134,7 +134,7 @@ def create_chat(user_id, chat_name, chat_description, security_level, list_of_us
     if user_level not in ["admin", "master"]:
         return False, "User does not have permissions to create chats."
     if security_level == "Open":
-        password = ""
+        password = True
     elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
         return False, "User does not have permissions to create Sensitive or Top Secret chats."
     else:
@@ -162,9 +162,9 @@ def create_chat(user_id, chat_name, chat_description, security_level, list_of_us
         user_chats[chat_id] = {"security level": security_level, "access": {"read": general_read, "write": general_write}}
         db.child("users").child(user).child("chats").update(user_chats)
     if security_level == "Open":
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
+        print(f"{chat_id} has been created by {creator}. The security level is {security_level}.")
     else:
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
+        print(f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}")
 
 def mass_user_creation(user_data):
     result = []
