@@ -137,9 +137,8 @@ def save_message():
 def get_all_chat():
     user_id = request.get_json()
     print(user_id)
-    state, message = reflect_all_chats(user_id=user_id)
-    if state:
-        return jsonify(message)
+    message = reflect_all_chats(user_id=user_id)
+    
     return jsonify(message)
 
 
@@ -187,10 +186,8 @@ def createChat():
     generalRead = data['generalRead']
     generalWrite = data['generalWrite']
     
-    state, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
-    if state:
-        #_ , message = reflect_all_chats(user_id=userId)
-        return jsonify(message)
+    message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
+    
     return jsonify(message)
     
 
