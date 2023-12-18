@@ -4,7 +4,6 @@ from database_functions import *
 import pyrebase
 
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -44,7 +43,7 @@ def login():
     print(result)
 
     if result:
-        return jsonify(user_id)
+        return jsonify({"token": user_id})
     else:
         return jsonify(message)
 
@@ -112,7 +111,7 @@ def save_message():
             message_content=message_content,
             file=file,
             filename=filename,
-            file_security=file_security
+            file_security=file_security,
         )
     except:
         state, message = save_message(
@@ -148,7 +147,9 @@ def augment_user():
     user_id = request.form["uid"]
     subject_user_id = request.form["subuid"]
     keyword = request.form["key"]
-    state, message = augment_user(user_id=user_id, subject_user_id=subject_user_id, keyword=keyword)
+    state, message = augment_user(
+        user_id=user_id, subject_user_id=subject_user_id, keyword=keyword
+    )
     if state:
         return jsonify(message)
     return jsonify(message)
@@ -180,19 +181,26 @@ def createChat():
     print(data)
 
     userId = data["userId"]
-    chatName = data['chatName']
-    chatDescription = data['chatDescription']
-    securityLevel = data['securityLevel']
-    listOfUsers = data['listOfUsers']
-    generalRead = data['generalRead']
-    generalWrite = data['generalWrite']
-    
-    state, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
+    chatName = data["chatName"]
+    chatDescription = data["chatDescription"]
+    securityLevel = data["securityLevel"]
+    listOfUsers = data["listOfUsers"]
+    generalRead = data["generalRead"]
+    generalWrite = data["generalWrite"]
+
+    state, message = create_chat(
+        user_id=userId,
+        chat_name=chatName,
+        chat_description=chatDescription,
+        security_level=securityLevel,
+        list_of_users=listOfUsers,
+        general_read=generalRead,
+        general_write=generalWrite,
+    )
     if state:
-        #_ , message = reflect_all_chats(user_id=userId)
+        # _ , message = reflect_all_chats(user_id=userId)
         return jsonify(message)
     return jsonify(message)
-    
 
 
 if __name__ == "__main__":
