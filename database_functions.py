@@ -281,7 +281,7 @@ def reflect_all_chats(user_id):
             chat_dict["security_level"] = chat_level
             return_list.append(chat_dict)
         print(return_list)
-        return True, return_list
+        return return_list
     else:
         return False, "Error in retrieving chats"
 
