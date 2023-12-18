@@ -48,12 +48,14 @@ def login():
         return jsonify(message)
 
 
-@app.route("/verifychatuser", methods=["GET"])
+@app.route("/verifychatuser", methods=["POST"])
 def verify_user():
-    user_id = request.args.get("uid")
-    chat_id = request.args.get("cid")
-    security_level = request.args.get("seclvl")
-    password = request.args.get("pass")
+    data = request.get_json()
+    user_id = data.get("uid")
+    chat_id = data.get("cid")
+    security_level = data.get("seclvl")
+    password = data.get("pass")
+
     state, message = verify_chat_user(
         user_id=user_id,
         chat_id=chat_id,
@@ -61,8 +63,8 @@ def verify_user():
         password=password,
     )
     if state:
-        return jsonify(message)
-    return jsonify(message)
+        return jsonify(success=True, message=message)
+    return jsonify(success=False, message=message)
 
 
 @app.route("/check_user_access", methods=["GET"])
