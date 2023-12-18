@@ -133,7 +133,7 @@ def create_chat(user_id, chat_name, chat_description, security_level, list_of_us
     if user_level not in ["admin", "master"]:
         return False, "User does not have permissions to create chats."
     if security_level == "Open":
-        password = ""
+        password = True
     elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
         return False, "User does not have permissions to create Sensitive or Top Secret chats."
     else:
@@ -160,9 +160,9 @@ def create_chat(user_id, chat_name, chat_description, security_level, list_of_us
         user_chats[chat_id] = {"security level": security_level, "access": {"read": general_read, "write": general_write}}
         db.child("users").child(user).child("chats").update(user_chats)
     if security_level == "Open":
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
+        print(f"{chat_id} has been created by {creator}. The security level is {security_level}.")
     else:
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
+        print(f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}")
 
 def mass_user_creation(user_data):
     result = {"username": {"user id": "password"}}
@@ -185,16 +185,20 @@ def mass_user_creation(user_data):
     return True, result
 
 def reflect_all_chats(user_id):
-    return_dict = {}
+    return_list = []
     user_chats = db.child("users").child(user_id).child("chats").get().val()
     chats = db.child("chats").get().val()
     if user_chats and chats:
-        for chat_id, chat_info in user_chats.items():
-            chat_data = chats.get(chat_id, {})
-            chat_name = chat_data.get("chat_name", "")
-            chat_level = chat_info.get("security level", "")
-            return_dict[chat_name] = {chat_level: chat_id}
-        return True, return_dict
+        for chat_id in user_chats:
+            chat_dict = {}
+            chat_name = chats[chat_id]["chat_name"]
+            chat_level = user_chats[chat_id]["security level"]
+            chat_dict["chat_name"] = chat_name
+            chat_dict["security_level"] = chat_level
+            chat_dict["chat_id"] = chat_id
+            return_list.append(chat_dict)
+        print(return_list)
+        return return_list
     else:
         return False, "Error in retrieving chats"
 
