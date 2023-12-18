@@ -135,10 +135,11 @@ def save_message():
 
 @app.route("/getallchat", methods=["GET", "POST"])
 def get_all_chat():
-    user_id = request.form["uid"]
+    user_id = request.get_json()
+    print(user_id)
     state, message = reflect_all_chats(user_id=user_id)
     if state:
-        return jsonify({"chat list":message})
+        return jsonify(message)
     return jsonify({"error":message})
 
 
@@ -186,11 +187,9 @@ def createChat():
     generalRead = data['generalRead']
     generalWrite = data['generalWrite']
     
-    state, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
-    if state:
-        #_ , message = reflect_all_chats(user_id=userId)
-        return jsonify({"success":message})
-    return jsonify({"error":message})
+    message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
+    print(message)
+    return jsonify(message)
     
 
 
