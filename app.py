@@ -48,13 +48,14 @@ def login():
         return jsonify(message)
 
 
-@app.route("/verifychatuser", methods=["POST"])
+@app.route("/verifychatuser", methods=["POST", "GET"])
 def verify_user():
     data = request.get_json()
     user_id = data.get("uid")
     chat_id = data.get("cid")
     security_level = data.get("seclvl")
     password = data.get("pass")
+
 
     state, message = verify_chat_user(
         user_id=user_id,
@@ -139,7 +140,7 @@ def get_all_chat():
     user_id = request.get_json()
     print(user_id)
     message = reflect_all_chats(user_id=user_id)
-    
+
     return jsonify(message)
 
 
@@ -182,15 +183,23 @@ def createChat():
     print(data)
 
     userId = data["userId"]
-    chatName = data['chatName']
-    chatDescription = data['chatDescription']
-    securityLevel = data['securityLevel']
-    listOfUsers = data['listOfUsers']
-    generalRead = data['generalRead']
-    generalWrite = data['generalWrite']
-    
-    message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers,  general_read=generalRead, general_write=generalWrite)
-    
+    chatName = data["chatName"]
+    chatDescription = data["chatDescription"]
+    securityLevel = data["securityLevel"]
+    listOfUsers = data["listOfUsers"]
+    generalRead = data["generalRead"]
+    generalWrite = data["generalWrite"]
+
+    message = create_chat(
+        user_id=userId,
+        chat_name=chatName,
+        chat_description=chatDescription,
+        security_level=securityLevel,
+        list_of_users=listOfUsers,
+        general_read=generalRead,
+        general_write=generalWrite,
+    )
+
     return jsonify(message)
 
 
