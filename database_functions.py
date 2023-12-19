@@ -28,15 +28,13 @@ def login_check(user_id, password):
 
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
-        chat = db.child("chats").child(chat_id).child(security_level).child(password)
-        print(chat)
-        chat_info = chat.get().val()
-        print(chat_info)
-        if not chat_info or "members" not in chat_info:
+        chat = db.child('chats').child(chat_id).child(security_level).child(password).child("members")
+        if not chat:
             return False, "Incorrect chat information."
-        member_list = chat.child("members").get().val()
+        member_list = chat.get().val()
+        print(member_list)
         if user_id in member_list:
-            return True, chat
+            return True, "User is in chat."
         else:
             return False, "User not in the chat group."
     except Exception as e:
@@ -216,6 +214,7 @@ def create_chat(
     else:
         password = str(uuid.uuid4())[:12]
     creator = db.child("users").child(user_id).get().val()["username"]
+    list_of_users.append(user_id)
     chat_data = {
         chat_id: {
             security_level: {
@@ -232,7 +231,7 @@ def create_chat(
         }
     }
     db.child("chats").update(chat_data)
-    list_of_users.append(user_id)
+    
     for user in list_of_users:
         user_chats = db.child("users").child(user).child("chats").get().val() or {}
         user_chats[chat_id] = {
