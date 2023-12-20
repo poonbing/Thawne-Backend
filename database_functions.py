@@ -121,7 +121,7 @@ def save_message(
         ).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
         if password:
-            message_content = encrypt_data(message_content, password + new_message_id)
+            message_content = encrypt_data(message_content, password)
         new_message = {
             "id": new_message_id,
             "date": timestamp,
