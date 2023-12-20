@@ -149,9 +149,10 @@ def save_message(
             message_list[new_message_count] = new_message
         else:
             message_list = {new_message_count:new_message}
+        members_list = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val()
         db.child("chats").child(chat_id).child(security_level).child(
             password
-        ).set({"chat_history":message_list})
+        ).set({"chat_history":message_list, "members":members_list})
         db.child("chats").child(chat_id).child(security_level).child(
             password
         ).update({"message_count":int(new_message_count), })
@@ -241,7 +242,7 @@ def create_chat(
                 password: {
                     "members": list_of_users,
                     "chat_history": {},
-                    "message_count": 1,
+                    "message_count": 0,
                 },
             },
             "chat_name": chat_name,

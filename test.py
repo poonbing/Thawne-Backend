@@ -19,5 +19,5 @@ firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
 
 
-create_chat("5d74d0f4", "NYP Bull Shitting", "Greatest Bullshitters", "Top Secret", ["6cc260f0", "cefc6d16", "893d318c"])
-#save_message("5d74d0f4", "df03f042-2aa", "Top Secret", "bc91901d-2b6", "Your mom stinky")
+#create_chat("5d74d0f4", "NYP Bull Shitting", "Greatest Bullshitters", "Top Secret", ["6cc260f0", "cefc6d16", "893d318c"])
+save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
