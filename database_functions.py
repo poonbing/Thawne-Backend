@@ -108,11 +108,20 @@ def save_message(
     try:
         user = db.child("users").child(user_id).get().val()
         new_message_count = str(
-            int(status.child("message_count").get().val()) + 1
+            int(
+                db.child("chats")
+                .child(chat_id)
+                .child(security_level)
+                .child(password)
+                .child("message_count")
+                .get()
+                .val()
+            )
+            + 1
         ).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
         if password:
-            message_content = encrypt_data(message_content, password)
+            message_content = encrypt_data(message_content, password + new_message_id)
         new_message = {
             "id": new_message_id,
             "date": timestamp,

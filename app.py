@@ -40,7 +40,7 @@ def login():
         password = data["password"]
 
     result, message = login_check(user_id, password)
-    print(result)
+    print(message)
 
     if result:
         return jsonify({"token": user_id})
@@ -56,6 +56,7 @@ def verify_user():
     security_level = data.get("seclvl")
     password = data.get("pass")
 
+    print(data)
 
     state, message = verify_chat_user(
         user_id=user_id,
@@ -96,25 +97,29 @@ def GetTopMessages():
 
 
 @app.route("/submitmessage", methods=["POST"])
-def save_message():
-    user_id = request.form["uid"]
-    chat_id = request.form["cid"]
-    security_level = request.form["seclvl"]
-    password = request.form["pass"]
-    message_content = request.form["msgcont"]
+def saveMessage():
+    data = request.get_json()
+    user_id = data.get("userId")
+    chat_id = data.get("chatId")
+    security_level = data.get("securityLevel")
+    password = data.get("chatPassword")
+    message_content = data.get("message")
+    print(f"The data is {data}")
+    print(f"{user_id} {chat_id} {security_level} {password} {message_content}")
+
     try:
-        file = request.form["file"]
-        filename = request.form["filename"]
-        file_security = request.form["file security"]
+        # file = data.get("file")
+        # filename = data.get("filename")
+        # file_security = data.get("file security")
         state, message = save_message(
             user_id=user_id,
             chat_id=chat_id,
             security_level=security_level,
             password=password,
             message_content=message_content,
-            file=file,
-            filename=filename,
-            file_security=file_security,
+            # file=file,
+            # filename=filename,
+            # file_security=file_security,
         )
     except:
         state, message = save_message(
@@ -124,6 +129,9 @@ def save_message():
             password=password,
             message_content=message_content,
         )
+
+    print(f"State: {state}, Message: {message}")
+
     if state:
         state, message = get_top_messages(
             user_id=user_id,
