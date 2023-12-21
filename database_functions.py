@@ -66,25 +66,12 @@ def get_top_messages(user_id, chat_id, security_level, password, message_count=2
     access = check_user_access(user_id, chat_id)
     if not access["read"]:
         return False, "User does not have permission to access this chat."
-    try:
-        messages = (
-            db.child("chats")
-            .child(chat_id)
-            .child(security_level)
-            .child(password)
-            .child("chat_history")
-            .limit_to_last(message_count)
-            .get()
-            .val()
-            or {}
-        )
-    except:
-        messages = status.child("chat_history").get().val() or {}
+    chat = db.child("chats").child(chat_id).child(security_level).child(password)
+    messages = chat.get().val()["chat_history"]
     message_list = list(reversed(messages.values()))
     if password != "":
         for message_data in message_list:
             message_data["content"] = decrypt_data(message_data["content"], password)
-
     return True, message_list
 
 

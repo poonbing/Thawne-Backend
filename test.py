@@ -20,4 +20,5 @@ db = firebase.database()
 
 
 #create_chat("5d74d0f4", "NYP Bull Shitting", "Greatest Bullshitters", "Top Secret", ["6cc260f0", "cefc6d16", "893d318c"])
-save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
+#save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
+get_top_messages("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
