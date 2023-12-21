@@ -33,13 +33,12 @@ def verify_chat_user(user_id, chat_id, security_level, password):
             .child(chat_id)
             .child(security_level)
             .child(password)
-            .child("members")
         )
         if not chat:
             return False, "Incorrect chat information."
-        member_list = chat.get().val()
+        member_list = chat.get().val()["members"]
         if user_id in member_list:
-            return True, chat.get().val()
+            return True, member_list
         else:
             return False, "User not in the chat group."
     except Exception as e:
@@ -52,9 +51,8 @@ def check_user_access(user_id, chat_id):
         .child(user_id)
         .child("chats")
         .child(chat_id)
-        .child("access")
         .get()
-        .val()
+        .val()["access"]
     )
     return user_access or {"read": False, "write": False}
 
@@ -160,14 +158,15 @@ def augment_user(user_id, subject_user_id, keyword):
     subject_user_level = (
         db.child("users").child(subject_user_id).child("level").get().val()
     )
-    if user_level != "admin":
+    if user_level != "master":
         return False, f"You do not have permissions to apply {keyword} to accounts."
     if subject_user_level == user_level:
         return (
             False,
             f"{subject_user_id} is at the same privilege level and cannot be {keyword}.",
         )
-    db.child("users").child(subject_user_id).child("status").update(keyword)
+    #print(db.child("users").child(subject_user_id).get().val()["status"])
+    db.child("users").child(subject_user_id).update({"status":keyword})
     return True, f"{subject_user_id} has been {keyword}."
 
 
@@ -179,7 +178,7 @@ def augment_user_chat_permission(user_id, subject_user_id, chat_id, keyword, sta
     subject_user_level = (
         db.child("users").child(subject_user_id).child("level").get().val()
     )
-    if user_level != "admin":
+    if user_level != "master":
         return (
             False,
             f"You do not have permissions to alter {keyword} permission of accounts.",
@@ -191,7 +190,7 @@ def augment_user_chat_permission(user_id, subject_user_id, chat_id, keyword, sta
         )
     db.child("users").child(subject_user_id).child("chats").child(chat_id).child(
         "access"
-    ).child(keyword).update(status)
+    ).update({keyword:status})
     return (
         True,
         f"{subject_user_id}'s {keyword} permission for {chat_id} has been changed to {status}.",
@@ -213,7 +212,7 @@ def create_chat(
     if user_level not in ["admin", "master"]:
         return False, "User does not have permissions to create chats."
     if security_level == "Open":
-        password = True
+        password = False
     elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
         return (
             False,

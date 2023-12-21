@@ -18,7 +18,13 @@ firebase_config = {
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
 
-
+#login_check("5d74d0f4", "poonbing@root")
+#verify_chat_user("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
+#check_user_access("5d74d0f4", "3d5655a5-f32")
+#get_top_messages("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
+save_message("cefc6d16", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
+#augment_user("5d74d0f4", "cefc6d16", "Enabled")
+print(augment_user_chat_permission("5d74d0f4", "cefc6d16", "3d5655a5-f32", "write", True))
 #create_chat("5d74d0f4", "NYP Bull Shitting", "Greatest Bullshitters", "Top Secret", ["6cc260f0", "cefc6d16", "893d318c"])
-#save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
-get_top_messages("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
+
+
