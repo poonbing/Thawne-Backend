@@ -40,7 +40,7 @@ def login():
         password = data["password"]
 
     result, message = login_check(user_id, password)
-    print(result)
+    print(message)
 
     if result:
         return jsonify({"token": user_id})
@@ -56,6 +56,7 @@ def verify_user():
     security_level = data.get("seclvl")
     password = data.get("pass")
 
+    print(data)
 
     state, message = verify_chat_user(
         user_id=user_id,
@@ -103,7 +104,7 @@ def saveMessage():
     security_level = data.get("securityLevel")
     password = data.get("chatPassword")
     message_content = data.get("message")
-    print(data)
+    print(f"The data is {data}")
     print(f"{user_id} {chat_id} {security_level} {password} {message_content}")
 
     try:
@@ -128,6 +129,9 @@ def saveMessage():
             password=password,
             message_content=message_content,
         )
+
+    print(f"State: {state}, Message: {message}")
+
     if state:
         state, message = get_top_messages(
             user_id=user_id,

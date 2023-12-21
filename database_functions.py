@@ -108,10 +108,21 @@ def save_message(
     try:
         user = db.child("users").child(user_id).get().val()
         new_message_count = str(
-            int(status.child("message_count").get().val()) + 1
+            int(
+                db.child("chats")
+                .child(chat_id)
+                .child(security_level)
+                .child(password)
+                .child("message_count")
+                .get()
+                .val()
+            )
+            + 1
         ).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
+        print(new_message_id)
         if password:
+            print(password)
             message_content = encrypt_data(message_content, password)
         new_message = {
             "id": new_message_id,
@@ -133,13 +144,18 @@ def save_message(
                 )
                 new_message["file"]["file_password"] = key
                 storage.child(filename).put(file)
-        with db.batch() as batch:
-            batch.child("chats").child(chat_id).child(security_level).child(
-                password
-            ).child("chat_history").child(new_message_count).push(new_message)
-            batch.child("chats").child(chat_id).child(security_level).child(
-                password
-            ).child("message_count").update(new_message_count)
+        message_list = db.child("chats").child(chat_id).child(security_level).child(password).child("chat_history").get().val()
+        if message_list != None:
+            message_list[new_message_count] = new_message
+        else:
+            message_list = {new_message_count:new_message}
+        members_list = db.child("chats").child(chat_id).child(security_level).child(password).child("members").get().val()
+        db.child("chats").child(chat_id).child(security_level).child(
+            password
+        ).set({"chat_history":message_list, "members":members_list})
+        db.child("chats").child(chat_id).child(security_level).child(
+            password
+        ).update({"message_count":int(new_message_count), })
         if file:
             return True, {new_message_id: {filename: file_pass}}
         else:
