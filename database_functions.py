@@ -213,7 +213,7 @@ def create_chat(
     if user_level not in ["admin", "master"]:
         return False, "User does not have permissions to create chats."
     if security_level == "Open":
-        password = True
+        password = False
     elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
         return (
             False,

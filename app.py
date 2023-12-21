@@ -77,20 +77,23 @@ def check_user_access():
     return jsonify(access)
 
 
-@app.route("/gettopmessages", methods=["GET"])
+@app.route("/gettopmessages", methods=["GET", "POST"])
 def GetTopMessages():
-    user_id = request.args.get("uid")
-    chat_id = request.args.get("cid")
-    security_level = request.args.get("seclvl")
-    password = request.args.get("pass")
-    message_count = request.args.get("msgc")
+    data = request.get_json()
+    user_id = data.get("userId")
+    chat_id = data.get("chatId")
+    security_level = data.get("securityLevel")
+    password = data.get("pass")
+    print(data)
+    # message_count = request.args.get("msgc")
     state, message = get_top_messages(
         user_id=user_id,
         chat_id=chat_id,
         security_level=security_level,
         password=password,
-        message_count=message_count,
+        # message_count=message_count,
     )
+    print(f"State: {state}, Message: {message}")
     if state:
         return jsonify(message)
     return jsonify(message)
