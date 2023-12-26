@@ -85,6 +85,8 @@ def GetTopMessages():
     security_level = data.get("securityLevel")
     password = data.get("pass")
     print(data)
+    if password == False:
+        password = 'false'
     # message_count = request.args.get("msgc")
     state, message = get_top_messages(
         user_id=user_id,
@@ -95,8 +97,8 @@ def GetTopMessages():
     )
     print(f"State: {state}, Message: {message}")
     if state:
-        return jsonify(message)
-    return jsonify(message)
+        return jsonify(success=True, message=message)
+    return jsonify(success=False, message=message)
 
 
 @app.route("/submitmessage", methods=["POST"])
@@ -109,6 +111,8 @@ def saveMessage():
     message_content = data.get("message")
     print(f"The data is {data}")
     print(f"{user_id} {chat_id} {security_level} {password} {message_content}")
+    if password == False:
+        password = 'false'
 
     try:
         # file = data.get("file")
