@@ -3,6 +3,7 @@ from datetime import datetime
 from cryptography import *
 from database_functions import *
 import pyrebase
+from data_class_model import *
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -34,6 +35,3 @@ db = firebase.database()
 #delete_user("5d74d0f4", "Leyau")
 #obtain_chat_details("7064eef8-abd", "Top Secret", "df3beae9-a62")
 
-
-
-#db.child("chats").child("3d5655a5-f32").child("Top Secret").child("7c0b69b0-2f8").update({"members":["5d74d0f4", "893d318c", "6cc260f0", "cefc6d16"]})
