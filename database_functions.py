@@ -249,9 +249,9 @@ def create_chat(
         }
         db.child("users").child(user).child("chats").update(user_chats)
     if security_level == "Open":
-        return f"{chat_id} has been created by {creator}. The security level is {security_level}."
+        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
     else:
-        return f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
+        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
 
 
 def mass_user_creation(user_data):
@@ -288,7 +288,7 @@ def reflect_all_chats(user_id):
             chat_dict["chat_name"] = chat_name
             chat_dict["security_level"] = chat_level
             return_list.append(chat_dict)
-        return return_list
+        return True, return_list
     else:
         return False, "Error in retrieving chats"
 
