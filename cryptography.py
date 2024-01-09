@@ -38,3 +38,16 @@ def decrypt_data(encrypted_data, key):
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
     return decrypted_data.decode("utf-8")
+
+def sha256_hash_bytes(input_string):
+    input_bytes = input_string.encode('utf-8')
+    sha256_hash_obj = hashlib.sha256()
+    sha256_hash_obj.update(input_bytes)
+    hashed_bytes = sha256_hash_obj.digest()
+    return hashed_bytes
+
+def generate_key(user_id, password):
+    salt = sha256_hash_bytes(user_id)[:32]
+    key_bytes = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    key = base64.b64encode(key_bytes).decode('utf-8')
+    return key
