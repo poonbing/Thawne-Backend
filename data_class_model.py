@@ -10,4 +10,4 @@ def predict_class_level(text):
     loaded_vectorizer = joblib.load('text_vectorizer.joblib')
     input_vector = loaded_vectorizer.transform([preprocessed_text])
     predicted_security_level = loaded_classifier.predict(input_vector)
-    print(predicted_security_level)
+    return predicted_security_level

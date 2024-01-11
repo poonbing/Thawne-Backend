@@ -3,6 +3,7 @@ from flask_cors import CORS
 from database_functions import *
 import pyrebase
 from flask_socketio import SocketIO
+from data_class_model import *
 
 
 app = Flask(__name__)
@@ -130,10 +131,16 @@ def saveMessage(data):
         socketio.emit('return_message_submission', message)
     socketio.emit('error_message_submission', message)
 
+@socketio.on("check_filename")
+def check_file_name(filename):
+    try:
+        granted_level = predict_class_level(filename)
+        socketio.emit('return_filename_check', granted_level)
+    except:
+        socketio.emit('error_filename_check', "Error occured.")
 
 @socketio.on('reflect_all_chats')
 def get_all_chat(user_id):
-    print(user_id)
     status, message = reflect_all_chats(user_id)
     if status:
         socketio.emit('return_all_chats', message)
