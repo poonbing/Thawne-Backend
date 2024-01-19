@@ -47,12 +47,12 @@
     }
 }
 
-{'Lee Boon Ping': {'UM10775': 'poonbing@root'}}, 
-{'Lewis Tay': {'UA29907': 'tewislay@root'}}, 
-{'Chua You Shen': {'UM68750': 'youshen52@root'}}, 
-{'Snir Shalev': {'UU55518': 'bobbysnir@root'}}
+{'Lee Boon Ping': {'UM77682': 'poonbing@root'}}, 
+{'Lewis Tay': {'UA25399': 'tewislay@root'}}, 
+{'Chua You Shen': {'UM84685': 'youshen52@root'}}, 
+{'Snir Shalev': {'UU26473': 'bobbysnir@root'}}
 
 {"chat name":{"chat id": "chat password"},
-"Class SF2203":{"S257936E":"SE2363"},
-"911 Flight Test":{"T283510T":"TT2145"},
-"NYP SIT Club":{"O129733N":"false"}}
+"Class SF2203":{"S279123E":"SE3371"},
+"911 Flight Test":{"T330571T":"TT1445"},
+"NYP SIT Club":{"O112748N":"false"}}

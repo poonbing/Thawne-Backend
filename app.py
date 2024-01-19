@@ -32,13 +32,16 @@ storage = firebase.storage()
 
 @socketio.on('login')
 def login(data):
+    print("trigger login")
     user_id = None
     password = None
     if "username" in data and "password" in data:
         user_id = data["username"]
         password = data["password"]
     result, message = login_check(user_id, password)
+    print(f"result = {result}, message = {message}")
     if result:
+        print("login success")
         socketio.emit('return_login', {"token": user_id})
     else:
         socketio.emit('error_login', {"error": message})
@@ -135,13 +138,20 @@ def saveMessage(data):
 def check_file_name(filename):
     try:
         granted_level = predict_class_level(filename)
+        # dictionary = {1:"Open", 2:"Sensitive", 3:"Top Secret"}
+        # result = dictionary
+        # for key in dictionary:
+        #     if dictionary[key] == granted_level:
+        #         result.pop(key)
+        #     elif dictionary[key] == granted_level:
+        #         break
         socketio.emit('return_filename_check', granted_level)
     except:
         socketio.emit('error_filename_check', "Error occured.")
 
 @socketio.on('reflect_all_chats')
-def get_all_chat(user_id):
-    status, message = reflect_all_chats(user_id)
+def get_all_chat(data):
+    status, message = reflect_all_chats(data.get("userId"), data.get("password"))
     if status:
         socketio.emit('return_all_chats', message)
     else:

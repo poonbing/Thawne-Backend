@@ -7,8 +7,10 @@ from app import db, storage, auth
 
 def login_check(user_id, password):
     try:
-        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower()))
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        print(f"local user id = {user['localId']}")
         user_data = db.child("users").child(user['localId']).get(token=user['idToken']).val()
+        print(user_data)
         if user_data:
             if user_data["status"] == 'Enabled':
                 try:
@@ -25,7 +27,7 @@ def login_check(user_id, password):
 
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
-        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower()))
+        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat = (
             db.child("chats")
             .child(chat['localId'])
@@ -59,7 +61,7 @@ def get_top_messages(user_id, chat_id, security_level, password):
     try:
         if not check:
             return False, status
-        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower()))
+        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat_info = db.child("chats").child(chat['localId']).child(security_level)
         messages = chat_info.get(token=['idToken']).val()["chat_history"]
         message_list = list(reversed(messages.values()))
@@ -77,7 +79,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
     if not check:
         return False, status
     try:
-        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower()))
+        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat_info = db.child("chats").child(chat['localId']).child(security_level).get(token=chat['idToken']).val()
         new_message_count = str(
             int(chat_info["message_count"]) + 1).zfill(6)
@@ -171,7 +173,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
 def create_chat(user_id, password, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True,):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     chat_id = security_level[:1].upper() + str(uuid.uuid4().int)[:6] + security_level[len(security_level)-1:].upper()
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower()))
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
     user_info = db.child("users").child(user['localId']).get(token=user['idToken']).val()
     user_level = user_info["level"]
     if user_level not in ["admin", "master"]:
@@ -199,7 +201,7 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
         }
     }
     db.child("chats").update(chat_data, token=user['idToken'])
-    auth.create_user_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower()))
+    auth.create_user_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
     users = db.child("users").get(token=user['idToken']).val()
     for uid in users:
         name = users[uid]["username"]
@@ -227,7 +229,7 @@ def mass_user_creation(user_data):
         user_id = ("u"+str(data["level"][:1])).upper()+str(uuid.uuid4().int)[:5]
         password = data["password"]
         key = generate_key(user_id.lower(), password.lower())
-        auth.create_user_with_email_and_password(user_id.lower()+"@thawne.com", key)
+        auth.create_user_with_email_and_password(user_id.lower()+"@thawne.com", key[:20])
         entry = {
             "user_id": user_id,
             "username": name,
@@ -236,7 +238,7 @@ def mass_user_creation(user_data):
             "status": "Enabled",
             "chats": {},
         }
-        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", key)
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", key[:20])
         db.child("users").child(user['localId']).update(entry, token=user['idToken'])
         result.append({name: {user_id: password}})
     return True, result
@@ -244,7 +246,7 @@ def mass_user_creation(user_data):
 
 def reflect_all_chats(user_id, password):
     return_list = []
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower()))
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
     user_chats = db.child("users").child(user['localId']).child("chats").get(token=user['idToken']).val()
     if user_chats:
         for chat_id in user_chats:
