@@ -27,7 +27,7 @@ auth = firebase.auth()
 # save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
 # augment_user("5d74d0f4", "cefc6d16", "Enabled")
 # augment_user_chat_permission("5d74d0f4", "cefc6d16", "3d5655a5-f32", "write", True)
-print(create_chat("UM77682", "poonbing@root", "InfoSec Project Development", "Very Secretive", "Top Secret", {"UA29907":"Lewis Tay", "UM68750":"Chua You Shen", "UU55518":"Snir Shalev"}))
+# print(create_chat("UM77682", "poonbing@root", "InfoSec Project Development", "Very Secretive", "Top Secret", {"UA29907":"Lewis Tay", "UM68750":"Chua You Shen", "UU55518":"Snir Shalev"}))
 # print(mass_user_creation({"Lee Boon Ping":{"password":"poonbing@root", "email":"poonbing@thawne.com", "level":"master"}, 
 #                     "Lewis Tay":{"password":"tewislay@root", "email":"tewislay@thawne.com", "level":"admin"},
 #                     "Chua You Shen":{"password":"youshen52@root", "email":"youshen52@thawne.com", "level":"master"},
@@ -39,4 +39,4 @@ print(create_chat("UM77682", "poonbing@root", "InfoSec Project Development", "Ve
 # delete_chat("5d74d0f4", "0468b201-468", "Open", "false")
 # delete_user("5d74d0f4", "Leyau")
 # obtain_chat_details("7064eef8-abd", "Top Secret", "df3beae9-a62")
-# print(predict_class_level("Prototype poster of upcoming event"))
+# print(predict_class_level("Records of employee personal information"))

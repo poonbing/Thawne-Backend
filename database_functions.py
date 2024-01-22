@@ -73,7 +73,7 @@ def get_top_messages(user_id, chat_id, security_level, password):
         return False, "Chat does not have messages yet."
 
 
-def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False,):
+def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
@@ -84,29 +84,20 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
         new_message_count = str(
             int(chat_info["message_count"]) + 1).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
-        if password != 'false':
-            message_content = encrypt_data(message_content, password)
         new_message = {
             "id": new_message_id,
             "date": timestamp,
             "sent_from": {user_id: status[user_id]},
-            "content": message_content,
         }
+        if message_content:
+            if password != 'false':
+                message_content = encrypt_data(message_content, password)
+            new_message['content'] = message_content
         if file:
-            new_message["file"] = {
+            new_message["content"] = {
                 "filename": filename,
-                "file_url": storage.child(filename).get_url(None),
                 "file_security": file_security,
-                "sent_from": {user_id: status[user_id]},
             }
-            if file_security in ["Top Secret", "Sensitive"]:
-                file_pass = str(uuid.uuid4())[:8]
-                salt = generate_salt()
-                key = str(
-                    bcrypt.hashpw(file_pass.encode("utf-8"), salt), encoding="utf-8"
-                )
-                new_message["file"]["file_password"] = key
-                storage.child(filename).put(file)
         message_list = chat_info["chat_history"]
         if message_list != None:
             message_list[new_message_count] = new_message
@@ -114,14 +105,20 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             message_list = {new_message_count:new_message}
         db.child("chats").child(chat['localId']).child(security_level).child("chat_history").set(message_list, token=chat['idToken'])
         db.child("chats").child(chat['localId']).child(security_level).child("message_count").set(new_message_count, token=chat['idToken'])
-        if file:
-            return True, {new_message_id: {filename: file_pass}}
-        else:
-            return True, new_message_id
+        return True, new_message_id
     except Exception as e:
         print(e)
         return False, "Error in message saving."
 
+def store_file(chat_id, password, filename, file, file_security):
+    user = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
+    if not user:
+        return False, "Incorrect User information."
+    try:
+        db.child('files').child(chat_id).child(file_security).child(filename).put(file, user['idToken'])
+        return True, "File upload successful."
+    except:
+        return False, "Error in file upload."
 
 # def augment_user(user_id, subject_user_id, keyword):
 #     valid_keywords = ["Enabled", "Disabled"]
@@ -172,7 +169,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
 
 def create_chat(user_id, password, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True,):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    chat_id = security_level[:1].upper() + str(uuid.uuid4().int)[:6] + security_level[len(security_level)-1:].upper()
+    chat_id = security_level[:1].upper() + str(uuid.uuid4().int)[:6] + security_level[-1:].upper()
     user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
     user_info = db.child("users").child(user['localId']).get(token=user['idToken']).val()
     user_level = user_info["level"]
@@ -183,7 +180,7 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
     elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
         return False, "User does not have permissions to create Sensitive or Top Secret chats.",
     else:
-        password = security_level[:1].upper() + security_level[len(security_level)-1:].upper() + str(uuid.uuid4().int)[:4] 
+        password = security_level[:1].upper() + security_level[-1:].upper() + str(uuid.uuid4().int)[:4] 
     creator = user_info["username"]
     list_of_users[user_id] = creator
     chat_data = {
@@ -385,3 +382,11 @@ def reflect_all_chats(user_id, password):
 #         "members": members,
 #     }
 #     return True, return_dict
+
+def log_event(user_id, password, type, offense, location, context):
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+    if not user:
+        return False, "Incorrect User information, please retry."
+    
+    db.child("logs queue")

@@ -103,5 +103,5 @@ example_data = {
     "Medical Records.": "Top Secret",
     "Personal Information of employees": "Top Secret",
     "Roadmap of production": "Top Secret",
-    "upcoming new software feature": "Top Secret",
+    "Upcoming new software feature": "Top Secret",
 }

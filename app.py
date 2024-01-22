@@ -138,16 +138,36 @@ def saveMessage(data):
 def check_file_name(filename):
     try:
         granted_level = predict_class_level(filename)
-        # dictionary = {1:"Open", 2:"Sensitive", 3:"Top Secret"}
-        # result = dictionary
-        # for key in dictionary:
-        #     if dictionary[key] == granted_level:
-        #         result.pop(key)
-        #     elif dictionary[key] == granted_level:
-        #         break
-        socketio.emit('return_filename_check', granted_level)
+        levels = ["Open", "Sensitive", "Top Secret"]
+        count = 0
+        for level in levels:
+            if granted_level == level:
+                levels = levels[count:]
+                break
+            count += 1
+        socketio.emit('return_filename_check', levels)
     except:
         socketio.emit('error_filename_check', "Error occured.")
+
+@socketio.on('file_upload')
+def handle_file_upload(data):
+    user_id = data['user_id']
+    chat_id = data['chat_id']
+    password = data['password']
+    security_level = data['security_level']
+    file = data['file']
+    filename = data['filename']
+    file_security = data['file_security']
+    file_password = "false"
+    if file_security != "Open":
+        file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
+        file = encrypt_data(file, file_password)
+    status, message = store_file(chat_id, password, file, filename, file_security)
+    status, _ = save_message (user_id, chat_id, security_level, password, False, True, filename, file_security)
+    if status:
+        socketio.emit('return_file_upload', file_password)
+    else:
+        socketio.emit('error', message)
 
 @socketio.on('reflect_all_chats')
 def get_all_chat(data):
