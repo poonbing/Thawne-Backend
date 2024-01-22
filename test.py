@@ -3,6 +3,7 @@ from datetime import datetime
 from cryptography import *
 from database_functions import *
 import pyrebase
+from data_class_model import *
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -17,23 +18,24 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
+auth = firebase.auth()
 
-#login_check("5d74d0f4", "poonbing@root")
-#verify_chat_user("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
-#check_user_access("5d74d0f4", "3d5655a5-f32")
-#get_top_messages("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
-#save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
-#augment_user("5d74d0f4", "cefc6d16", "Enabled")
-#augment_user_chat_permission("5d74d0f4", "cefc6d16", "3d5655a5-f32", "write", True)
-#create_chat("5d74d0f4", "NYP SIT Club", "Lmao", "Open", ["6cc260f0", "cefc6d16", "893d318c"])
-#mass_user_creation({"Leyau":{"password":"root", "email":"root@thawne.com", "level":"user"}})
-#reflect_all_chats("5d74d0f4")
-#remove_user_from_chat("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "cefc6d16")
-#add_user_to_chat("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "cefc6d16")
-#delete_chat("5d74d0f4", "0468b201-468", "Open", "false")
-#delete_user("5d74d0f4", "Leyau")
-#obtain_chat_details("7064eef8-abd", "Top Secret", "df3beae9-a62")
-
-
-
-#db.child("chats").child("3d5655a5-f32").child("Top Secret").child("7c0b69b0-2f8").update({"members":["5d74d0f4", "893d318c", "6cc260f0", "cefc6d16"]})
+# print(login_check("c434be03", "poonbing@root"))
+# print(verify_chat_user("c434be03", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8"))
+# check_user_access("5d74d0f4", "3d5655a5-f32")
+# get_top_messages("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8")
+# save_message("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "Your mom stinky")
+# augment_user("5d74d0f4", "cefc6d16", "Enabled")
+# augment_user_chat_permission("5d74d0f4", "cefc6d16", "3d5655a5-f32", "write", True)
+print(create_chat("UM10775", "poonbing@root", "NYP SIT Club", "Keep Splunkin", "Open", {"UA29907":"Lewis Tay", "UM68750":"Chua You Shen", "UU55518":"Snir Shalev"}))
+# print(mass_user_creation({"Lee Boon Ping":{"password":"poonbing@root", "email":"poonbing@thawne.com", "level":"master"}, 
+#                     "Lewis Tay":{"password":"tewislay@root", "email":"tewislay@thawne.com", "level":"admin"},
+#                     "Chua You Shen":{"password":"youshen52@root", "email":"youshen52@thawne.com", "level":"master"},
+#                     "Snir Shalev":{"password":"bobbysnir@root", "email":"bobbysnir@thawne.com", "level":"user"}}))
+# mass_user_creation({"Leyau":{"password":"root", "email":"root@thawne.com", "level":"user"}})
+# print(reflect_all_chats("c434be03", "poonbing@root"))
+# remove_user_from_chat("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "cefc6d16")
+# add_user_to_chat("5d74d0f4", "3d5655a5-f32", "Top Secret", "7c0b69b0-2f8", "cefc6d16")
+# delete_chat("5d74d0f4", "0468b201-468", "Open", "false")
+# delete_user("5d74d0f4", "Leyau")
+# obtain_chat_details("7064eef8-abd", "Top Secret", "df3beae9-a62")
