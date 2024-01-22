@@ -118,6 +118,9 @@ def saveMessage():
         # file = data.get("file")
         # filename = data.get("filename")
         # file_security = data.get("file security")
+        scan = text_scanning(message_content)
+        if scan:
+            print(f"There is sensitive data being sent. {scan}")
         state, message = save_message(
             user_id=user_id,
             chat_id=chat_id,
