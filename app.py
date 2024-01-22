@@ -232,6 +232,12 @@ def createChat(data):
         socketio.emit('return_chat_creation', message)
     socketio.emit('error_chat_creation', message)
 
+@socketio.on('log_event')
+def save_log(data):
+    status, message = log_event(data['user_id'], data['password'], data['type'], data['location'], data['context'])
+    if status:
+        socketio.emit('return_log_event', message)
+    socketio.emit('error_log_event', message)
 
 if __name__ == "__main__":
     socketio.run(app)
