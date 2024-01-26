@@ -44,5 +44,5 @@ auth = firebase.auth()
 # user = user = auth.sign_in_with_email_and_password('O112748N'.lower()+"@thawne.com", generate_key('O112748N'.lower(), 'false'.lower())[:20])
 # id_list = list(db.child('chats').child('O112748N').child('Open').child('chat_history').shallow().get(user['idToken']).val())
 # print(max(id_list, key=lambda x: int(x.lstrip('0') or '0')))
-
-print(log_event('UM77682', 'poonbing@root', 'Sharing of sensitive information', 'S279123E', 'casuvbiaubviadsbv'))
+print(get_top_messages('UM77682', 'O112748N', 'Open', 'false'))
+# print(log_event('UM77682', 'poonbing@root', 'Sharing of sensitive information', 'S279123E', 'casuvbiaubviadsbv'))
