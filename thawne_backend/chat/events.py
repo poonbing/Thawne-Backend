@@ -46,7 +46,7 @@ class ChatNamespace(Namespace):
     
     def on_check_filename(self, filename):
         try:
-            filename = filename.split('/')[-1].split('.')[1]
+            filename = filename.split('/')[-1]
             granted_level = predict_class_level(filename)
             levels = ["Open", "Sensitive", "Top Secret"]
             count = 0
@@ -70,7 +70,7 @@ class ChatNamespace(Namespace):
         filename = data.get('fileName')
         file_security = data.get('fileSecurity')
         file_password = "false"
-        filename = filename.split('/')[-1].split('.')[1]
+        filename = filename.split('/')[-1]
         if file_security != "Open":
             file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             file = encrypt_data(file, file_password)
