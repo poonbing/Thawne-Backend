@@ -106,11 +106,12 @@ def store_file(chat_id, password, filename, file, file_security):
     if not user:
         return False, "Incorrect User information."
     try:
-        storage.child(f'files/{chat_id}/{file_security}/{filename}').put(file, user['idToken'])
+        filepath = f'files/{chat_id}/{file_security}/{filename}'
+        storage.child(filepath).put(file, user['idToken'])
         return True, "File upload successful."
-    except:
-        return False, "Error in file upload."
-    
+    except Exception as e:
+        return False, f"Error in file upload: {e}"
+
 def return_file(chat_id, password, file_security, filename):
     user = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
     if not user:
