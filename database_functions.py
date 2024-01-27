@@ -27,8 +27,7 @@ def login_check(user_id, password):
 
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
-        lower_id = chat_id.lower()
-        chat = auth.sign_in_with_email_and_password(lower_id+"@thawne.com", generate_key(lower_id, password.lower())[:20])
+        chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         if not chat:
             return False, "Incorrect chat information."
         member_list = db.child("chats").child(chat_id).child(security_level).child("members").get(token=chat['idToken']).val()
@@ -54,18 +53,17 @@ def verify_chat_user(user_id, chat_id, security_level, password):
 
 def get_top_messages(user_id, chat_id, security_level, password):
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
-    try:
-        if not check:
+    if not check:
             return False, status
+    try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        print(message_list)
         if password != 'false':
             for message_data in message_list:
                 message_data["content"] = decrypt_data(message_data["content"], password)
         return True, message_list
     except:
-        return False, "Chat does not have messages yet."
+        return True, "Chat does not have messages yet."
 
 
 def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False):
