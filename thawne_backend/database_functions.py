@@ -15,6 +15,14 @@ sensitive_data = [
 ]
 
 def text_scanning(text):
+    sensitive_data = [
+    r'^[SFTG]\d{7}[A-Z]$', #NRIC
+    r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$',  #IPv4
+    r'^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$',  #Mastercard
+    r'\b([4]\d{3}[\s]\d{4}[\s]\d{4}[\s]\d{4}|[4]\d{3}[-]\d{4}[-]\d{4}[-]\d{4}|[4]\d{3}[.]\d{4}[.]\d{4}[.]\d{4}|[4]\d{3}\d{4}\d{4}\d{4})\b', #Visa
+    r'^3[47][0-9]{13}$',  #Amex
+    r'\b[\w.-]{0,25}@(yahoo|hotmail|gmail)\.com\b' #Email
+    ]
     words = text.split()  # Split the sentence into words
     for word in words:
         for pattern in sensitive_data:
@@ -85,7 +93,7 @@ def get_top_messages(user_id, chat_id, security_level, password):
         return True, "Chat does not have messages yet."
 
 
-def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False):
+def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
@@ -93,8 +101,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat_info = db.child("chats").child(chat_id).child(security_level).get(token=chat['idToken']).val()
-        new_message_count = str(
-            int(chat_info["message_count"]) + 1).zfill(6)
+        new_message_count = str(int(chat_info["message_count"]) + 1).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
         new_message = {
             "id": new_message_id,
@@ -109,6 +116,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             new_message["content"] = {
                 "filename": filename,
                 "file_security": file_security,
+                "file_password": file_password
             }
         try:
             message_list = chat_info["chat_history"]
@@ -126,7 +134,7 @@ def store_file(chat_id, password, filename, file, file_security):
     if not user:
         return False, "Incorrect User information."
     try:
-        db.child(f'files/{chat_id}/{file_security}/{filename}').child(chat_id).child(file_security).child(filename).put(file, user['idToken'])
+        storage.child(f'files/{chat_id}/{file_security}/{filename}').put(file, user['idToken'])
         return True, "File upload successful."
     except:
         return False, "Error in file upload."
@@ -411,5 +419,12 @@ def log_event(user_id, password, type_of_offense, location, context):
         return False, "Error in logging"
     return True, "Log Queued"
 
-
-    
+def return_file(chat_id, password, file_security, filename):
+    user = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
+    if not user:
+        return False, "Incorrect User information."
+    try:
+        file = storage.child(f'files/{chat_id}/{file_security}/{filename}').download(user['idToken'])
+        return True, file
+    except:
+        return False, "Error in obtaining file."
