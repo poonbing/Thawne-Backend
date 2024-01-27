@@ -140,6 +140,7 @@ def saveMessage(data):
 @socketio.on("check_filename")
 def check_file_name(filename):
     try:
+        filename = filename.split('/')[-1].split('.')[1]
         granted_level = predict_class_level(filename)
         levels = ["Open", "Sensitive", "Top Secret"]
         count = 0
@@ -162,6 +163,7 @@ def handle_file_upload(data):
     filename = data['filename']
     file_security = data['file_security']
     file_password = "false"
+    filename = filename.split('/')[-1].split('.')[1]
     if file_security != "Open":
         file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
         file = encrypt_data(file, file_password)
@@ -235,6 +237,12 @@ def createChat(data):
         socketio.emit('return_chat_creation', message)
     socketio.emit('error_chat_creation', message)
 
+@socketio.on('log_event')
+def save_log(data):
+    status, message = log_event(data['user_id'], data['password'], data['type'], data['location'], data['context'])
+    if status:
+        socketio.emit('return_log_event', message)
+    socketio.emit('error_log_event', message)
 
 if __name__ == "__main__":
     socketio.run(app)

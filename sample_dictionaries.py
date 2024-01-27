@@ -56,3 +56,19 @@
 "Class SF2203":{"S279123E":"SE3371"},
 "911 Flight Test":{"T330571T":"TT1445"},
 "NYP SIT Club":{"O112748N":"false"}}
+
+'logs queue':{
+    'log_id':{
+        'type of offense':{
+            'timestamp':{
+                'offender_id':{
+                    'location of offense':{
+                        'offense_context':{
+                            'data'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

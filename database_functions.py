@@ -47,14 +47,9 @@ def login_check(user_id, password):
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
-        chat = (
-            db.child("chats")
-            .child(chat['localId'])
-            .child(security_level)
-        )
         if not chat:
             return False, "Incorrect chat information."
-        member_list = chat.get(token=chat['idToken']).val()["members"]
+        member_list = db.child("chats").child(chat_id).child(security_level).child("members").get(token=chat['idToken']).val()
         if user_id in member_list:
             return True, {user_id:member_list[user_id]}
         else:
@@ -77,19 +72,17 @@ def verify_chat_user(user_id, chat_id, security_level, password):
 
 def get_top_messages(user_id, chat_id, security_level, password):
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
-    try:
-        if not check:
+    if not check:
             return False, status
+    try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
-        chat_info = db.child("chats").child(chat['localId']).child(security_level)
-        messages = chat_info.get(token=['idToken']).val()["chat_history"]
-        message_list = list(reversed(messages.values()))
-        if password != "":
+        message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
+        if password != 'false':
             for message_data in message_list:
                 message_data["content"] = decrypt_data(message_data["content"], password)
         return True, message_list
     except:
-        return False, "Chat does not have messages yet."
+        return True, "Chat does not have messages yet."
 
 
 def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False):
@@ -99,7 +92,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
         return False, status
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
-        chat_info = db.child("chats").child(chat['localId']).child(security_level).get(token=chat['idToken']).val()
+        chat_info = db.child("chats").child(chat_id).child(security_level).get(token=chat['idToken']).val()
         new_message_count = str(
             int(chat_info["message_count"]) + 1).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
@@ -117,24 +110,23 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
                 "filename": filename,
                 "file_security": file_security,
             }
-        message_list = chat_info["chat_history"]
-        if message_list != None:
+        try:
+            message_list = chat_info["chat_history"]
             message_list[new_message_count] = new_message
-        else:
+        except:
             message_list = {new_message_count:new_message}
-        db.child("chats").child(chat['localId']).child(security_level).child("chat_history").set(message_list, token=chat['idToken'])
-        db.child("chats").child(chat['localId']).child(security_level).child("message_count").set(new_message_count, token=chat['idToken'])
+        db.child("chats").child(chat_id).child(security_level).child("chat_history").set(message_list, token=chat['idToken'])
+        db.child("chats").child(chat_id).child(security_level).child("message_count").set(new_message_count, token=chat['idToken'])
         return True, new_message_id
     except Exception as e:
-        print(e)
-        return False, "Error in message saving."
+        return False, f"Error in message saving.{e}"
 
 def store_file(chat_id, password, filename, file, file_security):
     user = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
     if not user:
         return False, "Incorrect User information."
     try:
-        db.child('files').child(chat_id).child(file_security).child(filename).put(file, user['idToken'])
+        db.child(f'files/{chat_id}/{file_security}/{filename}').child(chat_id).child(file_security).child(filename).put(file, user['idToken'])
         return True, "File upload successful."
     except:
         return False, "Error in file upload."
@@ -402,10 +394,22 @@ def reflect_all_chats(user_id, password):
 #     }
 #     return True, return_dict
 
-def log_event(user_id, password, type, offense, location, context):
+def log_event(user_id, password, type_of_offense, location, context):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
     if not user:
         return False, "Incorrect User information, please retry."
+    try:
+        id_list = list(db.child("logs queue").shallow().get(user['idToken']).val())
+        counter = str(int(max(id_list, key=lambda x: int(x))) + 1).zfill(6)
+    except:
+        counter = '000000'
+    log = {type_of_offense:{timestamp:{user_id:{location:{"offense_context":context}}}}}
+    try:
+        db.child("logs queue").child(counter).update(log, user['idToken'])
+    except:
+        return False, "Error in logging"
+    return True, "Log Queued"
+
+
     
-    db.child("logs queue")
