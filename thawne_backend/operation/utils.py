@@ -1,5 +1,5 @@
 import pyrebase
-import datetime
+from datetime import datetime
 import uuid
 from cryptography import *
 

@@ -21,21 +21,21 @@ db = firebase.database()
 def login_check(user_id, password):
     try:
         user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-        print(f"local user id = {user['localId']}")
         user_data = db.child("users").child(user['localId']).get(token=user['idToken']).val()
-        print(user_data)
         if user_data:
-            if user_data["status"] == 'Enabled':
-                try:
-                    return True, user_data["chats"]
-                except:
-                    return True, "No chats available."
+            if user_data['status'] == 'Enabled':
+                db.child("user logs").child(user['localId']).child("login status").update(True, token=user['idToken'])
+                return True, "User successfully logged in"
             elif user_data["status"] == 'Disabled':
-                return False, f"User account disabled."
+                return False, f"User account disabled, unable to login."
         else:
             return False, "Incorrect Username or Password."
     except Exception as e:
         return False, f"Error during login check: {str(e)}"
+    
+def logout(user_id, password):
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+    db.child("user logs").child(user['localId']).child("login status").update(False, token=user['idToken'])
     
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:

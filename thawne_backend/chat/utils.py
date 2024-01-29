@@ -1,7 +1,7 @@
 import pyrebase
 from cryptography import *
 import re
-import datetime
+from datetime import datetime
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",

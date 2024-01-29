@@ -64,18 +64,20 @@ class ChatNamespace(Namespace):
     def on_file_upload(self, data):
         user_id = data.get('userId')
         chat_id = data.get('chatId')
-        password = data.get('password')
+        password = data.get('chatPassword')
         security_level = data.get('securityLevel')
-        file = data.get('file')
+        file_data = data.get('file')
         filename = data.get('fileName')
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
+        if password == False:
+            password, encrypted_password = 'False'
         if file_security != "Open":
             file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
-            file = encrypt_data(file, file_password)
+            file_data = encrypt_data(file_data, file_password)
             encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
-        status, message = store_file(chat_id, password, file, filename, file_security)
+        status, message = store_file(chat_id, password, file_data, filename, file_security)
         status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
         if status:
             emit('return_file_upload', file_password)
