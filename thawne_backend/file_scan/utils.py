@@ -2,7 +2,6 @@ import nltk
 import joblib
 import pyrebase
 from cryptography import *
-from app import filequeue
 import PyPDF2
 
 

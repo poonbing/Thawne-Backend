@@ -6,13 +6,12 @@ from chat.events import ChatNamespace
 from operation.events import OperationNamespace
 from logs.events import LogsNamespace
 from file_scan.events import FileScanNamespace
-from file_scan.queue import FileQueue
 
 
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
-filequeue = FileQueue()
+
 
 socketio.on_namespace(AuthenticateNamespace('/auth'))
 socketio.on_namespace(ChatNamespace('/chat'))

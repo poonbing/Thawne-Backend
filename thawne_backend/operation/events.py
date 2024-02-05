@@ -16,3 +16,22 @@ class OperationNamespace(Namespace):
             return
         emit('error_chat_creation', message)
         return
+    
+    def on_delete_chat(data):
+        pass
+
+
+
+
+# def delete_chat(user_id, chat_id, security_level, password):
+#     target_chat = db.child("chats").child(chat_id).child(security_level).child(password).get().val()
+#     if target_chat == None:
+#         return False, "Invalid chat or password."
+#     username = db.child("users").child(user_id).child("username").get().val()
+#     if db.child("chats").child(chat_id).get().val()["creator"] != username:
+#         return False, "User cannot delete the chat."
+#     member_list = target_chat["members"]
+#     for member_id in member_list:
+#         db.child("users").child(member_id).child("chats").child(chat_id).remove()
+#     db.child("chats").child(chat_id).remove()
+#     return True, "Chat has been deleted successfully"
