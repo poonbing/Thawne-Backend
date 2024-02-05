@@ -1,4 +1,4 @@
-from utils import file_scan
+from .utils import file_scan
 from app import filequeue
 from flask_socketio import Namespace, emit
 
