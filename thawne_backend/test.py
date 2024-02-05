@@ -54,7 +54,6 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
         }
     }
     db.child("chats").update(chat_data, token=user['idToken'])
-    auth.create_user_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
     users = db.child("users").get(token=user['idToken']).val()
     for uid in users:
         name = users[uid]["username"]
