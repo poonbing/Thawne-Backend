@@ -78,10 +78,15 @@ class ChatNamespace(Namespace):
             file_data = encrypt_data(file_data, file_password)
             encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
         status, message = store_file(chat_id, password, file_data, filename, file_security)
-        status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
         if status:
-            emit('return_file_upload', file_password)
-            return
+            status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
+            if status:
+                emit('return_file_upload', file_password)
+                emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
+                return
+            else:
+                emit('error_file_upload', message)
+                return
         else:
             emit('error_file_upload', message)
             return

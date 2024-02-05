@@ -54,7 +54,7 @@
 
 {"chat name":{"chat id": "chat password"},
 "Class SF2203":{"S279123E":"SE3371"},
-"911 Flight Test":{"T330571T":"TT1445"},
+"Very Secretive Channel":{"T255951T":"TT2943"},
 "NYP SIT Club":{"O112748N":"false"}}
 
 'logs queue':{

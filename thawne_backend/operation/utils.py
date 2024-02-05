@@ -56,17 +56,11 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
     for uid in users:
         name = users[uid]["username"]
         if name in list_of_users.values():
-            try:
-                users[uid]["chats"][chat_id] = {"chat_name":chat_name,
-                                                "security_level": security_level,
-                                                "access": {"read": general_read,
-                                                        "write": general_write},}
-            except:
-                users[uid]["chats"] = {chat_id:{"chat_name":chat_name,
-                                                "security_level": security_level,
-                                                "access": {"read": general_read,
-                                                        "write": general_write},}}
-    db.child("users").set(users, token=user['idToken'])
+            item = {"chat_name":chat_name,
+                    "security_level": security_level,
+                    "access": {"read": general_read,
+                    "write": general_write},}
+            db.child("users").child(uid).child("chats").child(chat_id).update(item, token=user['idToken'])
     if security_level == "Open":
         return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
     else:

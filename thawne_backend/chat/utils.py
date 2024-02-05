@@ -2,6 +2,8 @@ import pyrebase
 from cryptography import *
 import re
 from datetime import datetime
+import nltk
+import joblib
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -136,4 +138,12 @@ def reflect_all_chats(user_id, password):
         return True, return_list
     else:
         return False, "Error in retrieving chats"
-    
+
+def predict_class_level(text):
+    tokens = nltk.word_tokenize(text)
+    preprocessed_text = " ".join(tokens)
+    loaded_classifier = joblib.load('text_classifier_model.joblib')
+    loaded_vectorizer = joblib.load('text_vectorizer.joblib')
+    input_vector = loaded_vectorizer.transform([preprocessed_text])
+    predicted_security_level = loaded_classifier.predict(input_vector)
+    return predicted_security_level
