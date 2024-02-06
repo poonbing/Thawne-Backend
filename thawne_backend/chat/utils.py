@@ -147,3 +147,9 @@ def predict_class_level(text):
     input_vector = loaded_vectorizer.transform([preprocessed_text])
     predicted_security_level = loaded_classifier.predict(input_vector)
     return predicted_security_level
+
+def get_signed_url(filename):
+    bucket = storage.bucket("gs://thawne-d1541.appspot.com")
+    blob = bucket.blob(filename)
+    url = blob.generate_signed_url(version="v4", expiration=300, method="PUT")
+    return url

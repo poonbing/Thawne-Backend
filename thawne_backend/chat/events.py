@@ -1,6 +1,6 @@
 from flask_socketio import Namespace, emit
 from data_class_model import *
-from .utils import auth, db, get_top_messages, text_scanning, save_message, store_file, return_file, reflect_all_chats
+from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
 from cryptography import *
 
 class ChatNamespace(Namespace):
@@ -84,20 +84,14 @@ class ChatNamespace(Namespace):
                 password, encrypted_password = 'False'
             if file_security != "Open":
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
-                file_data = encrypt_data(file_data, file_password)
-                encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
-            status, message = store_file(chat_id, password, file_data, filename, file_security)
+            status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
             if status:
-                status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
-                if status:
-                    emit('return_file_upload', file_password)
-                    emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
-                    return
-                else:
-                    emit('error_file_upload', message)
-                    return
+                url = get_signed_url(filename)
+                emit('return_file_upload', {"url":url, "password":file_password})
+                emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
+                return
             else:
-                emit('error_file_upload', message)
+                emit('error_file_upload', 'Error in handling message')
                 return
         else:
             emit('inappropriate_level', granted_level)
