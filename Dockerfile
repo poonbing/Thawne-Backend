@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "thawne_backend/app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "thawne_backend.app:app"]
