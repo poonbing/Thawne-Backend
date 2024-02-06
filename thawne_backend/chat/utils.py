@@ -171,5 +171,5 @@ def predict_class_level(text):
 def get_signed_url(filename):
     bucket = storage.bucket("thawne-d1541.appspot.com")
     blob = bucket.blob(filename)
-    url = blob.generate_signed_url(version="v4", expiration=300, method="PUT")
+    url = blob.generate_signed_url(version="v4", expiration=0, method="PUT")
     return url
