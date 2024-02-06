@@ -55,6 +55,7 @@
 {"chat name":{"chat id": "chat password"},
 "Class SF2203":{"S279123E":"SE3371"},
 "Very Secretive Channel":{"T255951T":"TT2943"},
+"Overtime work" :{"S285465E":"SE1746"},
 "NYP SIT Club":{"O112748N":"false"}}
 
 'logs queue':{

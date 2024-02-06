@@ -9,7 +9,7 @@ from file_scan.events import FileScanNamespace
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*":{"origins":"https://localhost:3000"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 

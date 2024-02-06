@@ -21,9 +21,11 @@ db = firebase.database()
 storage = firebase.storage()
 
 def create_chat(user_id, password, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True,):
+    member_list = {}
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     chat_id = security_level[:1].upper() + str(uuid.uuid4().int)[:6] + security_level[-1:].upper()
     user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+    users = db.child("users").get(token=user['idToken']).val()
     user_info = db.child("users").child(user['localId']).get(token=user['idToken']).val()
     user_level = user_info["level"]
     if user_level not in ["admin", "master"]:
@@ -35,12 +37,17 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
     else:
         password = security_level[:1].upper() + security_level[-1:].upper() + str(uuid.uuid4().int)[:4] 
     creator = user_info["username"]
-    list_of_users[user_id] = creator
+    list_of_users.append(user_id)
+    for uid in users:
+        user_id = users[uid]["user_id"]
+        if user_id in list_of_users:
+            member_list[user_id] = users[uid]['username']
+    print(member_list)
     chat_data = {
         chat_id: {
             security_level:{
                     "chat_history":{},
-                    "members": list_of_users,
+                    "members": member_list,
                     "member_count": len(list_of_users),
                     "message_count": 0,
                 },
@@ -52,10 +59,10 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
     }
     db.child("chats").update(chat_data, token=user['idToken'])
     auth.create_user_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
-    users = db.child("users").get(token=user['idToken']).val()
+
     for uid in users:
-        name = users[uid]["username"]
-        if name in list_of_users.values():
+        user_id = users[uid]["user_id"]
+        if user_id in list_of_users:
             item = {"chat_name":chat_name,
                     "security_level": security_level,
                     "access": {"read": general_read,
