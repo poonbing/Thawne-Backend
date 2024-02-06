@@ -70,7 +70,6 @@ class ChatNamespace(Namespace):
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
-        url = get_signed_url(filename)
         granted_level = predict_class_level(filename)
         levels = ["Open", "Sensitive", "Top Secret"]
         count = 0
