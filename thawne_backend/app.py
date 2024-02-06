@@ -10,7 +10,7 @@ from file_scan.events import FileScanNamespace
 
 app = Flask(__name__)
 CORS(app, resources={r"/*":{"origins":"https://localhost:3000"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
 
 
 socketio.on_namespace(AuthenticateNamespace('/auth'))
@@ -21,4 +21,4 @@ socketio.on_namespace(FileScanNamespace('/filescan'))
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, debug=True, port='5000')
+    socketio.run(app=app)

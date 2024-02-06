@@ -1,0 +1,37 @@
+{
+  "rules": {
+    "chats":{
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$chatId": {
+        "$securityLevel": {
+          "chat_history": {
+            ".indexOn": ".value"
+          }
+        }
+      }
+    },
+    "users":{
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "logs queue":{
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$log_id":{
+        ".indexOn": ".value"
+      }
+    },
+    "user logs":{
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "logs history":{
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$log_id":{
+        ".indexOn": ".value"
+      }
+    }
+  }
+}
