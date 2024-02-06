@@ -26,20 +26,12 @@ def preprocess_text(text):
     return preprocessed_text
 
 def shuffle_dictionary(dictionary):
-    """
-    Shuffle the entries in the dictionary randomly.
-
-    Parameters:
-    - dictionary: dict, the dictionary to be shuffled.
-
-    Returns:
-    - shuffled_dict: dict, the shuffled dictionary.
-    """
     shuffled_keys = list(dictionary.keys())
     random.shuffle(shuffled_keys)
     shuffled_dict = {key: dictionary[key] for key in shuffled_keys}
     return shuffled_dict
-# train phase
+
+
 text_samples = list(example_data.keys())
 security_levels = list(example_data.values())
 X_train, X_test, y_train, y_test = train_test_split(

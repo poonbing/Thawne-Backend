@@ -1,5 +1,5 @@
 import pyrebase
-from cryptography import *
+from cryptography import generate_key, encrypt_data, decrypt_data
 import re
 from datetime import datetime
 import nltk
@@ -19,7 +19,7 @@ firebase_config = {
     "measurementId": "G-N2NEVEDM49",
 }
 
-service_account = {
+server_account = {
   "type": "service_account",
   "project_id": "thawne-d1541",
   "private_key_id": "af8b057fdcc05e5505ce0ae3b8f7340fe724e954",
@@ -37,8 +37,7 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 pyrestorage = firebase.storage()
-# bucket = storage.bucket('thawne-d1541.appspot.com')
-cred = credentials.Certificate(service_account)
+cred = credentials.Certificate(server_account)
 firebase_admin.initialize_app(cred)
 
 
@@ -163,14 +162,14 @@ def reflect_all_chats(user_id, password):
 def predict_class_level(text):
     tokens = nltk.word_tokenize(text)
     preprocessed_text = " ".join(tokens)
-    loaded_classifier = joblib.load('text_classifier_model.joblib')
-    loaded_vectorizer = joblib.load('text_vectorizer.joblib')
+    loaded_classifier = joblib.load('filename_classifier_model.joblib')
+    loaded_vectorizer = joblib.load('filename_vectorizer.joblib')
     input_vector = loaded_vectorizer.transform([preprocessed_text])
     predicted_security_level = loaded_classifier.predict(input_vector)
     return predicted_security_level
 
 def get_signed_url(filename):
-    print(filename)
+    bucket = storage.bucket("thawne-d1541.appspot.com")
     blob = bucket.blob(filename)
     url = blob.generate_signed_url(version="v4", expiration=0, method="PUT")
     return url
