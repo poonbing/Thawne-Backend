@@ -27,12 +27,14 @@ class AuthenticateNamespace(Namespace):
         logout(user_id, password)
 
     def on_verify_chat_user(self, data):
+        print(data)
         user_id = data.get("uid")
         chat_id = data.get("cid")
         security_level = data.get("seclvl")
         password = data.get("pass")
         state, message = verify_chat_user(user_id, chat_id, security_level, password,)
         if state:
+            print(message)
             emit('return_chat_user', message)
             return
         emit('error_chat_user', message)

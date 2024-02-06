@@ -42,9 +42,11 @@ def verify_chat_user(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         if not chat:
+            print("Incorrect chat information.")
             return False, "Incorrect chat information."
         member_list = db.child("chats").child(chat_id).child(security_level).child("members").get(token=chat['idToken']).val()
         if user_id in member_list:
+            print('Authenticated')
             return True, {user_id:member_list[user_id]}
         else:
             return False, "User not in the chat group."

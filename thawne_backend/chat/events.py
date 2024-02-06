@@ -70,6 +70,7 @@ class ChatNamespace(Namespace):
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
+        url = get_signed_url(filename)
         granted_level = predict_class_level(filename)
         levels = ["Open", "Sensitive", "Top Secret"]
         count = 0
@@ -84,10 +85,9 @@ class ChatNamespace(Namespace):
                 encrypted_password = 'False'
             if file_security != "Open":
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
-            status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
+            status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, 'false')
+            print(status)
             if status:
-                url = get_signed_url(filename)
-                print(url, password)
                 emit('return_file_upload', {"url":url, "password":file_password})
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
                 return
