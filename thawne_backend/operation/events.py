@@ -1,5 +1,5 @@
 from flask_socketio import Namespace, emit
-from .utils import create_chat
+from .utils import create_chat, delete_chat
 
 class OperationNamespace(Namespace):
     def on_create_chat(data):
@@ -13,12 +13,15 @@ class OperationNamespace(Namespace):
         status, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers, general_read=generalRead, general_write=generalWrite,)
         if status:
             emit('return_chat_creation', message)
-            return
-        emit('error_chat_creation', message)
-        return
+        else:
+            emit('error_chat_creation', message)
     
     def on_delete_chat(data):
-        pass
+        status, message = delete_chat(data.get("userId"), data.get("password"), data.get("chatId"))
+        if status:
+            emit('return_delete_chat', message)
+        else:
+            emit('error_delete_chat', message)
 
 
 

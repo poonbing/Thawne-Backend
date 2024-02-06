@@ -71,25 +71,36 @@ class ChatNamespace(Namespace):
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
-        if password == False:
-            password, encrypted_password = 'False'
-        if file_security != "Open":
-            file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
-            file_data = encrypt_data(file_data, file_password)
-            encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
-        status, message = store_file(chat_id, password, file_data, filename, file_security)
-        if status:
-            status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
+        granted_level = predict_class_level(filename)
+        levels = ["Open", "Sensitive", "Top Secret"]
+        count = 0
+        for level in levels:
+            if granted_level == level:
+                levels = levels[count:]
+                break
+            count += 1
+        if file_security in levels:
+            if password == False:
+                password, encrypted_password = 'False'
+            if file_security != "Open":
+                file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
+                file_data = encrypt_data(file_data, file_password)
+                encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
+            status, message = store_file(chat_id, password, file_data, filename, file_security)
             if status:
-                emit('return_file_upload', file_password)
-                emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
-                return
+                status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
+                if status:
+                    emit('return_file_upload', file_password)
+                    emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
+                    return
+                else:
+                    emit('error_file_upload', message)
+                    return
             else:
                 emit('error_file_upload', message)
                 return
         else:
-            emit('error_file_upload', message)
-            return
+            emit('inappropriate_level', granted_level)
 
     def on_request_file(self, data):
         chat_id = data.get('chatId')

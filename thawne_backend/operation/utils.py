@@ -65,3 +65,18 @@ def create_chat(user_id, password, chat_name, chat_description, security_level, 
         return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
     else:
         return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
+
+def delete_chat(user_id, password, chat_id):
+    try:
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        if db.child("users").child(user["localId"]).child("level").get(user["idToken"]).val() == "Master":
+            user_list = db.child("users").get(user["idToken"]).val()
+            for uid in user_list:
+                if chat_id in user_list[uid]["chats"]:
+                    db.child("users").child(uid).child("chats").child(chat_id).remove(user["idToken"])
+            db.child("chats").child(chat_id).remove(user["idToken"])
+            return True, "Chat has been removed"
+        else:
+            return False, "Invalid User Level."
+    except:
+        return False, "Error in removing chat"

@@ -19,6 +19,7 @@ auth = firebase.auth()
 db = firebase.database()
 
 def login_check(user_id, password):
+    print(user_id, password)
     try:
         user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
         user_data = db.child("users").child(user['localId']).get(token=user['idToken']).val()

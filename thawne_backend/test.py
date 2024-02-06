@@ -3,7 +3,7 @@ from datetime import datetime
 from cryptography import *
 import pyrebase
 from data_class_model import *
-from file_scan.queue import FileQueue
+from thawne_backend.file_scan.filequeue import FileQueue
 import PyPDF2
 
 firebase_config = {
