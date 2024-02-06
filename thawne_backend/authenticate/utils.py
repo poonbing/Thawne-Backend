@@ -25,7 +25,7 @@ def login_check(user_id, password):
         user_data = db.child("users").child(user['localId']).get(token=user['idToken']).val()
         if user_data:
             if user_data['status'] == 'Enabled':
-                db.child("user logs").child(user['localId']).child("login status").update(True, token=user['idToken'])
+                db.child("user logs").child(user['localId']).child("login status").set(True, token=user['idToken'])
                 return True, "User successfully logged in"
             elif user_data["status"] == 'Disabled':
                 return False, f"User account disabled, unable to login."
@@ -36,7 +36,7 @@ def login_check(user_id, password):
     
 def logout(user_id, password):
     user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-    db.child("user logs").child(user['localId']).child("login status").update(False, token=user['idToken'])
+    db.child("user logs").child(user['localId']).child("login status").set(False, token=user['idToken'])
     
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
