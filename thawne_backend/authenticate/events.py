@@ -4,7 +4,6 @@ from .utils import login_check, verify_chat_user, logout
 
 class AuthenticateNamespace(Namespace):
     def on_login(self, data):
-        print("login triggered")
         user_id = None
         password = None
         if "username" in data and "password" in data:
@@ -12,7 +11,6 @@ class AuthenticateNamespace(Namespace):
             password = data["password"]
         status, message = login_check(user_id, password)
         if status:
-            print("login resolved")
             emit('return_login', {"token": user_id})
             return
         else:
