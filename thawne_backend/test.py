@@ -3,7 +3,7 @@ from datetime import datetime
 from cryptography import *
 import pyrebase
 from data_class_model import *
-from thawne_backend.file_scan.filequeue import FileQueue
+# from thawne_backend.file_scan.filequeue import FileQueue
 import PyPDF2
 
 firebase_config = {
@@ -21,51 +21,15 @@ firebase = pyrebase.initialize_app(firebase_config)
 db = firebase.database()
 auth = firebase.auth()
 storage = firebase.storage()
-filequeue = FileQueue()
 
-def create_chat(user_id, password, chat_name, chat_description, security_level, list_of_users, general_read=True, general_write=True,):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    chat_id = security_level[:1].upper() + str(uuid.uuid4().int)[:6] + security_level[-1:].upper()
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-    user_info = db.child("users").child(user['localId']).get(token=user['idToken']).val()
-    user_level = user_info["level"]
-    if user_level not in ["admin", "master"]:
-        return False, "User does not have permissions to create chats."
-    if security_level == "Open":
-        password = 'false'
-    elif security_level in ["Sensitive", "Top Secret"] and user_level == "admin":
-        return False, "User does not have permissions to create Sensitive or Top Secret chats.",
-    else:
-        password = security_level[:1].upper() + security_level[-1:].upper() + str(uuid.uuid4().int)[:4] 
-    creator = user_info["username"]
-    list_of_users[user_id] = creator
-    chat_data = {
-        chat_id: {
-            security_level:{
-                    "chat_history":{},
-                    "members": list_of_users,
-                    "member_count": len(list_of_users),
-                    "message_count": 0,
-                },
-            "chat_name": chat_name,
-            "creation_date": timestamp,
-            "chat_description": chat_description,
-            "creator": creator,
-        }
-    }
-    db.child("chats").update(chat_data, token=user['idToken'])
-    users = db.child("users").get(token=user['idToken']).val()
-    for uid in users:
-        name = users[uid]["username"]
-        if name in list_of_users.values():
-            item = {"chat_name":chat_name,
-                    "security_level": security_level,
-                    "access": {"read": general_read,
-                    "write": general_write},}
-            db.child("users").child(uid).child("chats").child(chat_id).update(item, token=user['idToken'])
-    if security_level == "Open":
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}."
-    else:
-        return True, f"{chat_id} has been created by {creator}. The security level is {security_level}. The following is the password: {password}"
-    
-print(create_chat("UM77682", "poonbing@root", "Very Secretive Channel", "Top Secret things going on here.", "Top Secret", {"UA25399":"Snir Shalev", 'UM26633':"Chua You Shen", 'UU26473':"Lewis Tay"}))
+
+def predict_class_level(text):
+    tokens = nltk.word_tokenize(text)
+    preprocessed_text = " ".join(tokens)
+    loaded_classifier = joblib.load('text_classifier_model.joblib')
+    loaded_vectorizer = joblib.load('text_vectorizer.joblib')
+    input_vector = loaded_vectorizer.transform([preprocessed_text])
+    predicted_security_level = loaded_classifier.predict(input_vector)
+    return predicted_security_level
+
+print(predict_class_level("feb09"))

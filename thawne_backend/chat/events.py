@@ -1,7 +1,8 @@
 from flask_socketio import Namespace, emit
 from data_class_model import *
 from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
-from cryptography import *
+from ..cryptography import *
+import uuid
 
 class ChatNamespace(Namespace):
     def on_get_message_list(self, data):
@@ -31,7 +32,6 @@ class ChatNamespace(Namespace):
             emit('error_message_submission', "Sensitive information detected")
             return
         try:
-            file = data.get("file")
             filename = data.get("filename")
             file_security = data.get("file security")
             state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
@@ -66,7 +66,6 @@ class ChatNamespace(Namespace):
         chat_id = data.get('chatId')
         password = data.get('chatPassword')
         security_level = data.get('securityLevel')
-        file_data = data.get('file')
         filename = data.get('fileName')
         file_security = data.get('fileSecurity')
         file_password = "false"
@@ -96,7 +95,6 @@ class ChatNamespace(Namespace):
                 emit('error_file_upload', 'Error in handling message')
                 return
         else:
-            print("Wrong level")
             emit('inappropriate_level', granted_level[0])
 
     def on_request_file(self, data):
