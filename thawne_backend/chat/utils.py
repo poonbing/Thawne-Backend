@@ -58,13 +58,15 @@ def verify_chat_user(user_id, chat_id, security_level, password):
 def get_top_messages(user_id, chat_id, security_level, password):
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
-            return False, status
+        return False, status
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        if password != 'false':
-            for message_data in message_list:
-                message_data["content"] = decrypt_data(message_data["content"], password)
+        if message_list:
+            if password != 'false':
+                for message_data in message_list:
+                    message_data["content"] = decrypt_data(message_data["content"], password)
+        print(message_list)
         return True, message_list
     except:
         return True, "Chat does not have messages yet."
@@ -90,12 +92,14 @@ def text_scanning(text):
 def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
-    if not check:
+    if not check:        
         return False, status
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat_info = db.child("chats").child(chat_id).child(security_level).get(token=chat['idToken']).val()
+       
         new_message_count = str(int(chat_info["message_count"]) + 1).zfill(6)
+       
         new_message_id = f"{chat_id}{new_message_count}"
         new_message = {
             "id": new_message_id,
@@ -113,12 +117,14 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
                 "file_password": file_password
             }
         try:
-            message_list = chat_info["chat_history"]
+
+            message_list = chat_info["chat_history"]   
             message_list[new_message_count] = new_message
         except:
             message_list = {new_message_count:new_message}
         db.child("chats").child(chat_id).child(security_level).child("chat_history").set(message_list, token=chat['idToken'])
         db.child("chats").child(chat_id).child(security_level).child("message_count").set(new_message_count, token=chat['idToken'])
+
         return True, new_message_id
     except Exception as e:
         return False, f"Error in message saving.{e}"

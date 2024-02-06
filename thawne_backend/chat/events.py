@@ -20,6 +20,7 @@ class ChatNamespace(Namespace):
         return
 
     def on_submit_message(self, data):
+        print(data)
         user_id = data.get("userId")
         chat_id = data.get("chatId")
         security_level = data.get("securityLevel")
@@ -27,16 +28,18 @@ class ChatNamespace(Namespace):
         message_content = data.get("message")
         if password == False:
             password = 'false'
-        scan = text_scanning(message_content)
-        if scan:
-            emit('error_message_submission', "Sensitive information detected")
-            return
-        try:
-            filename = data.get("filename")
-            file_security = data.get("file security")
-            state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
-        except:
-            state, message = save_message(user_id, chat_id, security_level, password, message_content,)
+        # scan = text_scanning(message_content)
+        # if scan:
+        #     emit('error_message_submission', "Sensitive information detected")
+        #     return
+        # try:
+        #     filename = data.get("filename")
+        #     file_security = data.get("file security")
+        #     state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
+        # except:
+        state, message = save_message(user_id, chat_id, security_level, password, message_content)
+        print(state)
+        print(message)
         if state:
             state, message = get_top_messages(user_id, chat_id, security_level, password,)
             emit('return_message_submission', message)
