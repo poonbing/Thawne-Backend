@@ -1,7 +1,7 @@
 import pyrebase
 from datetime import datetime
 import uuid
-from cryptography import *
+from cryptography import generate_key
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",

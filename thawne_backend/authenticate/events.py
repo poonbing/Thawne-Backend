@@ -11,7 +11,9 @@ class AuthenticateNamespace(Namespace):
             password = data["password"]
         status, message = login_check(user_id, password)
         if status:
-            emit('return_login', {"token": user_id})
+            response = {"token": user_id}
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            emit('return_login', response)
             return
         else:
             print(f"login failed: {message}")

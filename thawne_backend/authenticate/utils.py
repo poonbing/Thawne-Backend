@@ -1,5 +1,5 @@
 import pyrebase
-from cryptography import *
+from cryptography import generate_key
 
 
 firebase_config = {

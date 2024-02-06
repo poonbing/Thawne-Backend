@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from authenticate.events import AuthenticateNamespace
@@ -19,6 +19,9 @@ socketio.on_namespace(OperationNamespace('/operation'))
 socketio.on_namespace(LogsNamespace('/log'))
 socketio.on_namespace(FileScanNamespace('/filescan'))
 
+@app.route("/")
+def default():
+    return render_template('index.html')
 
 if __name__ == "__main__":
     socketio.run(app=app)
