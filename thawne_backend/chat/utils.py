@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 import nltk
 import joblib
+from google.cloud import storage
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -149,7 +150,9 @@ def predict_class_level(text):
     return predicted_security_level
 
 def get_signed_url(filename):
-    bucket = storage.bucket("gs://thawne-d1541.appspot.com")
+    print(filename)
+    client = storage.Client()
+    bucket = client.get_bucket("thawne-d1541.appspot.com")
     blob = bucket.blob(filename)
-    url = blob.generate_signed_url(version="v4", expiration=300, method="PUT")
+    url = blob.generate_signed_url(version="v4", expiration=0, method="PUT")
     return url

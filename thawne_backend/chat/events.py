@@ -81,12 +81,14 @@ class ChatNamespace(Namespace):
             count += 1
         if file_security in levels:
             if password == False:
-                password, encrypted_password = 'False'
+                password = 'False'
+                encrypted_password = 'False'
             if file_security != "Open":
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
             if status:
                 url = get_signed_url(filename)
+                print(url, password)
                 emit('return_file_upload', {"url":url, "password":file_password})
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
                 return
@@ -94,7 +96,8 @@ class ChatNamespace(Namespace):
                 emit('error_file_upload', 'Error in handling message')
                 return
         else:
-            emit('inappropriate_level', granted_level)
+            print("Wrong level")
+            emit('inappropriate_level', granted_level[0])
 
     def on_request_file(self, data):
         chat_id = data.get('chatId')
