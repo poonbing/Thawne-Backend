@@ -1,7 +1,7 @@
 from flask_socketio import Namespace, emit
 from data_class_model import *
 from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
-from ..cryptography import *
+from cryptography import generate_key, sha256_hash_bytes
 import uuid
 
 class ChatNamespace(Namespace):
@@ -70,6 +70,7 @@ class ChatNamespace(Namespace):
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
+        url = get_signed_url(filename)
         granted_level = predict_class_level(filename)
         levels = ["Open", "Sensitive", "Top Secret"]
         count = 0
@@ -85,7 +86,7 @@ class ChatNamespace(Namespace):
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, encrypted_password)
             if status:
-                url = get_signed_url(filename)
+                
                 emit('return_file_upload', {"url":url, "password":file_password})
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
                 return
