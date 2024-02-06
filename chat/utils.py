@@ -1,5 +1,5 @@
 import pyrebase
-from cryptography import generate_key, encrypt_data, decrypt_data
+from utils.cryptography import generate_key, encrypt_data, decrypt_data
 import re
 from datetime import datetime
 import nltk

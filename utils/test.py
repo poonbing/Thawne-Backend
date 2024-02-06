@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from cryptography import *
+from cryptography import encrypt_data, decrypt_data
 import pyrebase
 from data_class_model import *
 # from thawne_backend.file_scan.filequeue import FileQueue
@@ -32,4 +32,9 @@ def predict_filename_level(text):
     predicted_security_level = loaded_classifier.predict(input_vector)
     return predicted_security_level
 
-print(predict_class_level('Public_Brochure'))
+
+
+encrypted = encrypt_data("your mother", "your mother")
+print(encrypted)
+decrypted = decrypt_data(encrypted, "your mother")
+print(decrypted)

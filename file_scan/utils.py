@@ -1,7 +1,7 @@
 import nltk
 import joblib
 import pyrebase
-from cryptography import generate_key
+from utils.cryptography import generate_key
 import PyPDF2
 import os
 

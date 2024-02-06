@@ -1,7 +1,7 @@
 from flask_socketio import Namespace, emit
-from data_class_model import *
+from utils.data_class_model import *
 from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
-from cryptography import generate_key, sha256_hash_bytes
+from utils.cryptography import generate_key, sha256_hash_bytes
 import uuid
 
 class ChatNamespace(Namespace):
