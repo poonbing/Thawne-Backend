@@ -1,5 +1,5 @@
 import pyrebase
-from ..cryptography import *
+from cryptography import *
 import re
 from datetime import datetime
 import nltk
@@ -37,6 +37,7 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 pyrestorage = firebase.storage()
+# bucket = storage.bucket('thawne-d1541.appspot.com')
 cred = credentials.Certificate(service_account)
 firebase_admin.initialize_app(cred)
 
@@ -169,7 +170,7 @@ def predict_class_level(text):
     return predicted_security_level
 
 def get_signed_url(filename):
-    bucket = storage.bucket()
+    print(filename)
     blob = bucket.blob(filename)
     url = blob.generate_signed_url(version="v4", expiration=0, method="PUT")
     return url
