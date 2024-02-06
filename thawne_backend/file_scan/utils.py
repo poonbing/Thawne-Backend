@@ -1,8 +1,9 @@
 import nltk
 import joblib
 import pyrebase
-from cryptography import *
+from cryptography import generate_key
 import PyPDF2
+import os
 
 
 firebase_config = {
