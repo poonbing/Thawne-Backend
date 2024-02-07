@@ -41,7 +41,6 @@ cred = credentials.Certificate(server_account)
 firebase_admin.initialize_app(cred)
 
 
-
 def verify_chat_user(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
@@ -62,12 +61,12 @@ def get_top_messages(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        if password != 'false':
-            for message_data in message_list:
-                message_data["content"] = decrypt_data(message_data["content"], password)
+        # if password != 'false':
+        #     for message_data in message_list:
+        #         message_data["content"] = decrypt_data(message_data["content"], password)
         return True, message_list
-    except:
-        return True, "Chat does not have messages yet."
+    except Exception as e:
+        return True, f"Chat does not have messages yet. {e}"
     
 def text_scanning(text):
     sensitive_data = [

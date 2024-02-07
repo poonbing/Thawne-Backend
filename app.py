@@ -12,19 +12,25 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
 
-socketio.on_namespace(AuthenticateNamespace('/auth'))
-socketio.on_namespace(ChatNamespace('/chat'))
-socketio.on_namespace(OperationNamespace('/operation'))
-socketio.on_namespace(LogsNamespace('/log'))
-socketio.on_namespace(FileScanNamespace('/filescan'))
+
+def main():
+    socketio.on_namespace(AuthenticateNamespace('/auth'))
+    socketio.on_namespace(ChatNamespace('/chat'))
+    socketio.on_namespace(OperationNamespace('/operation'))
+    socketio.on_namespace(LogsNamespace('/log'))
+    socketio.on_namespace(FileScanNamespace('/filescan'))
+    socketio.run(app=app)
+
 
 @app.route("/")
 def default():
     return render_template('index.html')
 
+
 @app.route("/ping")
 def hello_world():
     return "pong"
 
+
 if __name__ == "__main__":
-    socketio.run(app=app, port=5000)
+    main()

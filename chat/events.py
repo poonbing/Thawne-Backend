@@ -3,6 +3,35 @@ from utils.data_class_model import *
 from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
 from utils.cryptography import generate_key, sha256_hash_bytes
 import uuid
+from threading import Thread
+
+
+active_streams = {}
+
+
+class StreamHandler(Thread):
+    def __init__(self, user_id, chat_id, security_level, password):
+        super().__init__()
+        self.user_id = user_id
+        self.chat_id = chat_id
+        self.security_level = security_level
+        self.password = password
+        self.user = auth.sign_in_with_email_and_password(user_id.lower() + "@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        self.stream = db.child("chats").child(chat_id).child(security_level).child("chat_history").stream(lambda x: self.stream_update(), stream_id=user_id, token=self.user["idToken"])
+
+    def stream_update(self):
+        status, message = get_top_messages(self.user_id, self.chat_id, self.security_level, self.password)
+        if status:
+            emit('return_message_list', message)
+        else:
+            emit('error_message_list', message)
+
+    def run(self):
+        self.stream.start()
+
+    def stop(self):
+        self.stream.close()
+
 
 class ChatNamespace(Namespace):
     def on_get_message_list(self, data):
@@ -14,10 +43,12 @@ class ChatNamespace(Namespace):
             password = 'false'
         state, message = get_top_messages(user_id, chat_id, security_level, password,)
         if state:
+            stream_handler = StreamHandler(user_id, chat_id, security_level, password)
+            stream_handler.start()
+            active_streams[user_id] = stream_handler
             emit('return_message_list', message)
-            return
-        emit('error_message_list', message)
-        return
+        else:
+            emit('error_message_list', message)
 
     def on_submit_message(self, data):
         user_id = data.get("userId")
@@ -30,19 +61,18 @@ class ChatNamespace(Namespace):
         scan = text_scanning(message_content)
         if scan:
             emit('error_message_submission', "Sensitive information detected")
-            return
-        try:
-            filename = data.get("filename")
-            file_security = data.get("file security")
-            state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
-        except:
-            state, message = save_message(user_id, chat_id, security_level, password, message_content,)
-        if state:
-            state, message = get_top_messages(user_id, chat_id, security_level, password,)
-            emit('return_message_submission', message)
-            return
-        emit('error_message_submission', message)
-        return
+        else:
+            try:
+                filename = data.get("filename")
+                file_security = data.get("file security")
+                state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
+            except:
+                state, message = save_message(user_id, chat_id, security_level, password, message_content,)
+            if state:
+                state, message = get_top_messages(user_id, chat_id, security_level, password,)
+                emit('return_message_submission', message)
+            else:
+                emit('error_message_submission', message)
     
     def on_check_filename(self, filename):
         try:
@@ -90,10 +120,8 @@ class ChatNamespace(Namespace):
             if status:
                 emit('return_file_upload', {"url":url, "password":file_password})
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
-                return
             else:
                 emit('error_file_upload', 'Error in handling message')
-                return
         else:
             emit('inappropriate_level', granted_level[0])
 
@@ -110,21 +138,20 @@ class ChatNamespace(Namespace):
             file_password_hash = db.child("chats").child(chat_id).child(security_level).child('chat_history').child(message_id).child('content').child('file_password').get(token=chat['idToken']).val()
         except:
             emit('error_request_file', "Incorrect credentials")
-            return
         encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
         if encrypted_password == file_password_hash:
             file = return_file(chat_id, password, file_security, filename)
             emit('return_request_file', file)
-            return
         else:
             emit('error_request_file', "Incorrect password")
-            return
         
     def on_reflect_all_chats(self, data):
-        status, message = reflect_all_chats(data.get("userId"), data.get("password"))
+        user_id = data.get("userId")
+        status, message = reflect_all_chats(user_id, data.get("password"))
         if status:
+            if user_id in active_streams:
+                stream_handler = active_streams.pop(user_id)
+                stream_handler.stop()
             emit('return_all_chats', message)
-            return
         else:
             emit('error_all_chats', message)
-            return
