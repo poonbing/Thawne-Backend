@@ -62,10 +62,10 @@ def get_top_messages(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        if message_list:
-            if password != 'false':
-                for message_data in message_list:
-                    message_data["content"] = decrypt_data(message_data["content"], password)
+        # if message_list:
+        #     if password != 'false':
+        #         for message_data in message_list:
+        #             message_data["content"] = decrypt_data(message_data["content"], password)
         print(message_list)
         return True, message_list
     except:

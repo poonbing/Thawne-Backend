@@ -21,20 +21,22 @@ def derive_key(
 
 
 def encrypt_data(data, key):
-    key = hashlib.sha256(key.encode('utf-8')).digest()[:16]
+    data = data.encode('utf-8')
+    key = hashlib.sha256(key.encode('utf-8')).digest()
     cipher = AES.new(key, AES.MODE_GCM)
     ciphertext, tag = cipher.encrypt_and_digest(data)
     return base64.b64encode(cipher.nonce + tag + ciphertext).decode('utf-8')
 
 
 def decrypt_data(encrypted_data, key):
-    key = hashlib.sha256(key.encode('utf-8')).digest()[:16]
+    encrypted_data = base64.b64decode(encrypted_data.encode('utf-8'))
     nonce = encrypted_data[:16]
     tag = encrypted_data[16:32]
     ciphertext = encrypted_data[32:]
+    key = hashlib.sha256(key.encode('utf-8')).digest()
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
-    return decrypted_data.decode("utf-8")
+    return decrypted_data.decode('utf-8')
 
 def sha256_hash_bytes(input_string):
     input_bytes = input_string.encode('utf-8')
