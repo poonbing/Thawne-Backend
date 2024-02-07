@@ -13,13 +13,13 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
 
 
-def main():
-    socketio.on_namespace(AuthenticateNamespace('/auth'))
-    socketio.on_namespace(ChatNamespace('/chat'))
-    socketio.on_namespace(OperationNamespace('/operation'))
-    socketio.on_namespace(LogsNamespace('/log'))
-    socketio.on_namespace(FileScanNamespace('/filescan'))
-    socketio.run(app=app)
+
+socketio.on_namespace(AuthenticateNamespace('/auth'))
+socketio.on_namespace(ChatNamespace('/chat'))
+socketio.on_namespace(OperationNamespace('/operation'))
+socketio.on_namespace(LogsNamespace('/log'))
+socketio.on_namespace(FileScanNamespace('/filescan'))
+    
 
 
 @app.route("/")
@@ -33,4 +33,4 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    main()
+    socketio.run(app=app, port=5000)
