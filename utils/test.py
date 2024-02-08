@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from cryptography import *
+from cryptography import generate_key
 import pyrebase
 from data_class_model import *
 # from thawne_backend.file_scan.filequeue import FileQueue
@@ -23,13 +23,12 @@ auth = firebase.auth()
 storage = firebase.storage()
 
 
-def predict_filename_level(text):
-    tokens = nltk.word_tokenize(text)
-    preprocessed_text = " ".join(tokens)
-    loaded_classifier = joblib.load('filename_classifier_model.joblib')
-    loaded_vectorizer = joblib.load('filename_vectorizer.joblib')
-    input_vector = loaded_vectorizer.transform([preprocessed_text])
-    predicted_security_level = loaded_classifier.predict(input_vector)
-    return predicted_security_level
+def stream_update(user_id):
+    print(user_id)
 
-print(predict_class_level('Public_Brochure'))
+def trigger_stream(user_id, chat_id, security_level, password):
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+    my_stream = db.child("chats").child(chat_id).child(security_level).child("chat_history").stream(stream_update(user_id), stream_id=user_id, token=user["idToken"])
+
+
+trigger_stream("UM77682", "S121057E", "Sensitive", "poonbing@root")
