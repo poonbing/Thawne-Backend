@@ -31,7 +31,6 @@ class ChatNamespace(Namespace):
 
 
     def on_submit_message(self, data):
-        print(data)
         user_id = data.get("userId")
         chat_id = data.get("chatId")
         security_level = data.get("securityLevel")
