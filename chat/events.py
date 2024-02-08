@@ -1,46 +1,13 @@
-from flask_socketio import Namespace, emit
+from flask_socketio import Namespace, emit, join_room, send, leave_room, rooms
 from utils.data_class_model import *
 from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
 from utils.cryptography import generate_key, sha256_hash_bytes
 import uuid
-from threading import Thread
-
-
-
-
-
 
 
 
 class ChatNamespace(Namespace):
-    def __init__(self, namespace='/'):
-        super().__init__(namespace)
-        self.active_streams = {}
-        
-      
-
-    class StreamHandler(Thread):
-        def __init__(self, user_id, chat_id, security_level, password):
-            super().__init__()
-            self.user_id = user_id
-            self.chat_id = chat_id
-            self.security_level = security_level
-            self.password = password
-            self.user = auth.sign_in_with_email_and_password(chat_id.lower() + "@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
-            self.stream = db.child("chats").child(chat_id).child(security_level).child("chat_history").stream(lambda x: self.stream_update(), stream_id=user_id, token=self.user["idToken"])
-
-        def stream_update(self):
-            status, message = get_top_messages(self.user_id, self.chat_id, self.security_level, self.password)
-            if status:
-                emit('return_message_list', message)
-            else:
-                emit('error_message_list', message)
-
-        def run(self):
-            self.stream.start()
-
-        def stop(self):
-            self.stream.close()
+    user_rooms = {}
 
     def on_get_message_list(self, data):
         user_id = data.get("userId")
@@ -49,14 +16,19 @@ class ChatNamespace(Namespace):
         password = data.get("pass")
         if password == False:
             password = 'false'
-        state, message = get_top_messages(user_id, chat_id, security_level, password,)
+        state, message = get_top_messages(user_id, chat_id, security_level, password)
         if state:
-            stream_handler = self.StreamHandler(user_id, chat_id, security_level, password)
-            stream_handler.start()
-            self.active_streams[user_id] = stream_handler
+            try:
+                room_name = self.user_rooms[user_id]
+                leave_room(room_name)
+            except:
+                pass
+            join_room(chat_id)
+            self.user_rooms[user_id] = chat_id
             emit('return_message_list', message)
         else:
             emit('error_message_list', message)
+
 
     def on_submit_message(self, data):
         print(data)
@@ -67,25 +39,21 @@ class ChatNamespace(Namespace):
         message_content = data.get("message")
         if password == False:
             password = 'false'
-        try:
-            filename = data.get("filename")
-            file_security = data.get("file security")
-            state, message = save_message(user_id, chat_id, security_level, password, message_content, True, filename, file_security,)
-        except:
-            state, message = save_message(user_id, chat_id, security_level, password, message_content)
-            print(state)
-            print(message)
-        if state:
-            state, message = get_top_messages(user_id, chat_id, security_level, password,)
-            emit('return_message_submission', message)
         else:
-            emit('error_message_submission', message)
+            state, message = save_message(user_id, chat_id, security_level, password, message_content,)
+            if state:
+                state, message = get_top_messages(user_id, chat_id, security_level, password,)
+                emit('return_message_submission', message)
+                _, message = get_top_messages(user_id, chat_id, security_level, password)
+                emit('return_message_list', message, to=chat_id)
+            else:
+                emit('error_message_submission', message)
     
     def on_check_filename(self, filename):
         try:
             filename = filename.split('/')[-1]
             granted_level = predict_class_level(filename)
-            levels = ["Open", "Sensitive", "Top Secret"]
+            levels = ["Top Secret", "Sensitive", "Open"]
             count = 0
             for level in levels:
                 if granted_level == level:
@@ -157,11 +125,6 @@ class ChatNamespace(Namespace):
         user_id = data.get("userId")
         status, message = reflect_all_chats(user_id, data.get("password"))
         if status:
-            if user_id in self.active_streams:
-                stream_handler = self.active_streams.pop(user_id)
-                stream_handler.stop()
             emit('return_all_chats', message)
         else:
-            emit('error_all_chats', message)
-
-
+            emit('error_all_chats', message) 

@@ -12,9 +12,7 @@ class FileQueue:
             return False
 
     def is_empty(self):
-        if not self.items:
-            return True
-        return False
+        return not self.items
 
     def size(self):
         return len(self.items)

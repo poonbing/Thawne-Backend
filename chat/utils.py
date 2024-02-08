@@ -88,7 +88,7 @@ def text_scanning(text):
                 print('Matched:', matched_word)
                 return matched_word
             
-def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
+def save_message(user_id, chat_id, security_level, password, message_content):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
