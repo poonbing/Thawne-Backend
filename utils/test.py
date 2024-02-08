@@ -23,12 +23,6 @@ auth = firebase.auth()
 storage = firebase.storage()
 
 
-def stream_update(user_id):
-    print(user_id)
+dict = {"UM77682":"values"}
 
-def trigger_stream(user_id, chat_id, security_level, password):
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-    my_stream = db.child("chats").child(chat_id).child(security_level).child("chat_history").stream(stream_update(user_id), stream_id=user_id, token=user["idToken"])
-
-
-trigger_stream("UM77682", "S121057E", "Sensitive", "poonbing@root")
+dict["UM"]

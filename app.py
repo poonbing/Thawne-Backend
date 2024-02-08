@@ -9,8 +9,8 @@ from file_scan.events import FileScanNamespace
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
 
 
 
@@ -33,4 +33,4 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, port=5000)
+    socketio.run(app=app, port=5000, debug=True)
