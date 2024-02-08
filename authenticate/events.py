@@ -12,8 +12,8 @@ class AuthenticateNamespace(Namespace):
         status, message = login_check(user_id, password)
         if status:
             response = {"token": user_id}
-            print(response)
-            response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+            print(f"The response is: {response}")
+            # response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
             emit("return_login", response)
             return
         else:
