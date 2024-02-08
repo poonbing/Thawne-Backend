@@ -7,6 +7,7 @@ import joblib
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
+import mimetypes
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -181,5 +182,6 @@ def predict_class_level(text):
 def get_signed_url(filename):
     bucket = storage.bucket("gs://thawne-d1541.appspot.com")
     blob = bucket.blob(filename)
-    url = blob.generate_signed_url(version="v4", expiration=0, method="PUT")
+    mime_type, _ = mimetypes.guess_type(filename)
+    url = blob.generate_signed_url(version="v4", expiration=0, method="PUT", content_type=mime_type)
     return url
