@@ -30,8 +30,3 @@ dict = {"chat name":{"chat id": "chat password"},
 "Very Secretive Channel":{"T255951T":"TT2943"},
 "NYP SIT Club":{"O112748N":"false"},
 }
-
-item = encrypt_data(json.dumps(dict), "Your mother")
-print(item)
-result = decrypt_data(item, "Your mother")
-print(json.loads(result))

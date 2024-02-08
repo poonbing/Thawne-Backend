@@ -1,5 +1,5 @@
 from flask_socketio import Namespace, emit
-from .utils import create_chat, delete_chat
+from .utils import queue_chat_request
 import json
 from utils.cryptography import encrypt_data
 
@@ -15,7 +15,7 @@ class OperationNamespace(Namespace):
         generalWrite = data.get("generalWrite")
         userPassword = data.get("userPassword")
         try:
-            status, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers, general_read=generalRead, general_write=generalWrite, password=userPassword)
+            status, message = queue_chat_request(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers, general_read=generalRead, general_write=generalWrite, password=userPassword)
             # message = encrypt_data(json.dumps(message))
             if status:
                 print(message)
@@ -27,7 +27,7 @@ class OperationNamespace(Namespace):
 
     
     def on_delete_chat(data):
-        status, message = delete_chat(data.get("userId"), data.get("password"), data.get("chatId"))
+        status, message = queue_chat_request(data.get("userId"), data.get("password"), data.get("chatId"))
         # message = encrypt_data(json.dumps(message))
         if status:
             emit('return_delete_chat', message)
