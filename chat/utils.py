@@ -107,14 +107,14 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             "date": timestamp,
             "sent_from": {user_id: status[user_id]},
         }
-        if file:
+        if filename:
             new_message["content"] = {
                 "file_password": file_password,
                 "file_security":file_security,
                 "filename":filename
             }
         if message_content:
-            if file:
+            if filename:
                 message_content = filename
             if password != 'false':
                 message_content = encrypt_data(message_content, password)
