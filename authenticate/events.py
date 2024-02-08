@@ -16,7 +16,7 @@ class AuthenticateNamespace(Namespace):
             return
         else:
             print(f"login failed: {message}")
-            emit('error_login', {"error": message})
+            emit("error_login", {"error": message})
             return
 
     def on_logout(self, data):
@@ -31,11 +31,15 @@ class AuthenticateNamespace(Namespace):
         chat_id = data.get("cid")
         security_level = data.get("seclvl")
         password = data.get("pass")
-        state, message = verify_chat_user(user_id, chat_id, security_level, password,)
+        state, message = verify_chat_user(
+            user_id,
+            chat_id,
+            security_level,
+            password,
+        )
         if state:
             print(message)
-            emit('return_chat_user', message)
+            emit("return_chat_user", message)
             return
-        emit('error_chat_user', message)
+        emit("error_chat_user", message)
         return
-    
