@@ -95,8 +95,7 @@ def queue_chat_request(user_id, password, action, chat_name, chat_description=No
             request_count = db.child("chat queue").child("queue_count").get(token=user["idToken"]).val() + 1
             queue_count = db.child("chat queue").child("request_count").get(token=user["idToken"]).val() + 1
         except:
-            request_count = 1
-            queue_count = 1
+            request_count, queue_count = 1
         request = {(request_count):{
                 "action":action,
                 "chat_name": chat_name,
@@ -109,27 +108,74 @@ def queue_chat_request(user_id, password, action, chat_name, chat_description=No
             request[request_count]["general_write"] = general_write
         elif action == "Delete":
             pass
-        db.child("chat_queue").child("queue").update(request, token=user["idToken"])
-        db.child("chat_queue").child("queue_count").update(queue_count, token=user["idToken"])
-        db.child("chat_queue").child("request_count").update(request_count, token=user["idToken"])
+        db.child("chat queue").child("queue").update(request, token=user["idToken"])
+        db.child("chat queue").child("queue_count").update(queue_count, token=user["idToken"])
+        db.child("chat queue").child("request_count").update(request_count, token=user["idToken"])
         return True, "Queue Successfully Added."
     except Exception as e:
         return False, e
 
 def resolve_chat_queue(user_id, password, request_id):
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-    request = db.child("chat_queue").child("queue").child(request_id).get(token=user["idToken"]).val()
-    if request["action"] == "Create":
-        state, message = create_chat(user_id, 
-                    password, 
-                    chat_name=request["chat_name"], 
-                    chat_description=request["chat_description"], 
-                    security_level=request["security_level"], 
-                    list_of_users=request["list_of_users"], 
-                    general_read=request["general_read"], 
-                    general_write=request["general_write"])
-    elif request["action"] == "Delete":
-        state, message = delete_chat(user_id, password, request["chat_name"])
-    if state:
-        return True, message
-    return False, message
+    try:
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        request = db.child("chat_queue").child("queue").child(request_id).get(token=user["idToken"]).val()
+        if request["action"] == "Create":
+            state, message = create_chat(user_id, 
+                        password, 
+                        chat_name=request["chat_name"], 
+                        chat_description=request["chat_description"], 
+                        security_level=request["security_level"], 
+                        list_of_users=request["list_of_users"], 
+                        general_read=request["general_read"], 
+                        general_write=request["general_write"])
+        elif request["action"] == "Delete":
+            state, message = delete_chat(user_id, password, request["chat_name"])
+        if state:
+            return True, message
+        return False, message
+    except Exception as e:
+        return False, e
+
+def augment_user(user_id, password, subject_user_id, keyword):
+    try:
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        user_level = db.child("users").child(user["localId"]).child("level").get(token=user["idToken"]).val()
+        if user_level == "Master":
+            user_list = db.child("users").get(token=user["idToken"]).val()
+            for users in user_list:
+                if user_list[users]["user_id"] == subject_user_id:
+                    db.child("users").child(users).child("status").update(keyword, token=user["idToken"])
+                    return True, f"User has been {keyword}"
+            return False, "Target user not found."
+        return False, "Current user not authorized to augment users."
+    except Exception as e:
+        return False, e
+
+def queue_augment_user(user_id, password, subject_user_id, keyword):
+    try:
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        try:
+            request_count = db.child("user augment queue").child("queue_count").get(token=user["idToken"]).val() + 1
+            queue_count = db.child("user augment queue").child("request_count").get(token=user["idToken"]).val() + 1
+        except:
+            request_count, queue_count = 1
+        request = {request_count:{
+            "subject_user_id":subject_user_id,
+            "keyword":keyword
+        }}
+        db.child("user augment queue").child("queue").update(request, token=user["idToken"])
+        db.child("user augment queue").child("queue_count").update(queue_count, token=user["idToken"])
+        db.child("user augment queue").child("request_count").update(request_count, token=user["idToken"])
+    except Exception as e:
+        return False, e
+    
+def resolve_augment_user(user_id, password, request_id):
+    try:
+        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+        request = db.child("user augment queue").child("queue").child(request_id).get(token=user["idToken"]).val()
+        state, message = augment_user(user_id, password, request["subject_user_id"], request["keyword"])
+        if state:
+            return True, message
+        return False, message
+    except Exception as e:
+        return False, e
