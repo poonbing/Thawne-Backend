@@ -62,6 +62,7 @@ def get_top_messages(user_id, chat_id, security_level, password):
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
         if password != 'false':
+            print(message_list)
             for message_data in message_list:
                 try:
                     message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)

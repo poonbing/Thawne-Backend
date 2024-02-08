@@ -31,6 +31,7 @@ class ChatNamespace(Namespace):
 
 
     def on_submit_message(self, data):
+        print(data)
         user_id = data.get("userId")
         chat_id = data.get("chatId")
         security_level = data.get("securityLevel")
@@ -76,13 +77,14 @@ class ChatNamespace(Namespace):
         filename = filename.split('/')[-1]
         url = get_signed_url(filename)
         granted_level = predict_class_level(filename)
-        levels = ["Open", "Sensitive", "Top Secret"]
+        levels = ["Top Secret", "Sensitive", "Open"]
         count = 0
         for level in levels:
             if granted_level == level:
                 levels = levels[count:]
                 break
             count += 1
+        print(levels)
         if file_security in levels:
             if password == False:
                 password = 'False'
