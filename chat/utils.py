@@ -100,7 +100,6 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         chat_info = db.child("chats").child(chat_id).child(security_level).get(token=chat['idToken']).val()
-        print(chat_info)
         new_message_count = str(int(chat_info["message_count"]) + 1).zfill(6)
         new_message_id = f"{chat_id}{new_message_count}"
         new_message = {
@@ -180,8 +179,12 @@ def predict_class_level(text):
     return predicted_security_level
 
 def get_signed_url(filename):
-    bucket = storage.bucket("gs://thawne-d1541.appspot.com")
+    bucket = storage.bucket("thawne-d1541.appspot.com")
     blob = bucket.blob(filename)
     mime_type, _ = mimetypes.guess_type(filename)
-    url = blob.generate_signed_url(version="v4", expiration=0, method="PUT", content_type=mime_type)
+    if mime_type is None:
+        mime_type = 'application/octet-stream'
+    url = blob.generate_signed_url(version="v4", expiration=300, method="PUT", content_type=mime_type)
+    print(mime_type)
+    print(url)
     return url

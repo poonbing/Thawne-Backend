@@ -90,9 +90,12 @@ class ChatNamespace(Namespace):
             if file_security != "Open":
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, 'false')
-            print(status)
             if status:
-                emit('return_file_upload', {"url":url, "password":file_password})
+                emit('return_file_upload', {"url":url, "password":file_password}, headers={
+             'Access-Control-Allow-Origin': 'http://localhost:3000',
+             'Access-Control-Allow-Methods': 'PUT',  # Specify the allowed methods
+             'Access-Control-Allow-Headers': 'Content-Type'  # Specify the allowed headers
+         })
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
                 _, message = get_top_messages(user_id, chat_id, security_level, password)
                 emit('return_message_list', message, to=chat_id)
