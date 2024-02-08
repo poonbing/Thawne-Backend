@@ -94,6 +94,8 @@ class ChatNamespace(Namespace):
             if status:
                 emit('return_file_upload', {"url":url, "password":file_password})
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
+                _, message = get_top_messages(user_id, chat_id, security_level, password)
+                emit('return_message_list', message, to=chat_id)
             else:
                 emit('error_file_upload', 'Error in handling message')
         else:

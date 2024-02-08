@@ -65,7 +65,8 @@ def get_top_messages(user_id, chat_id, security_level, password):
             if message_list:
                 for message_data in message_list:
                     try:
-                        message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
+                        if message_list[message_data]["content"]["file_security"] != "Open":
+                            message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
                     except:
                         message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
         return True, message_list
