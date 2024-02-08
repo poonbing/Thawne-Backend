@@ -64,8 +64,10 @@ def get_top_messages(user_id, chat_id, security_level, password):
         if password != 'false':
             print(message_list)
             for message_data in message_list:
-                message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
-        print(message_list)
+                try:
+                    message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
+                except:
+                    message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"
@@ -103,16 +105,21 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             "date": timestamp,
             "sent_from": {user_id: status[user_id]},
         }
-        if message_content:
-             if password != 'false':
-                 message_content = encrypt_data(message_content, password)
-        new_message['content'] = message_content
-        if filename:
+        if file:
             new_message["content"] = {
-                "filename": filename,
-                "file_security": file_security,
-                "file_password": file_password
+                "file_password": file_password,
+                "file_security":file_security,
+                "filename":filename
             }
+        if message_content:
+            if file:
+                message_content = filename
+            if password != 'false':
+                message_content = encrypt_data(message_content, password)
+            if file:
+                new_message['content']['filename'] = message_content
+            else:
+                new_message['content'] = message_content
         try:
             message_list = chat_info["chat_history"]
             message_list[new_message_count] = new_message
