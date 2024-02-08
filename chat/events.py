@@ -31,7 +31,6 @@ class ChatNamespace(Namespace):
 
 
     def on_submit_message(self, data):
-        print(data)
         user_id = data.get("userId")
         chat_id = data.get("chatId")
         security_level = data.get("securityLevel")
@@ -39,16 +38,15 @@ class ChatNamespace(Namespace):
         message_content = data.get("message")
         if password == False:
             password = 'false'
+        state, message = save_message(user_id, chat_id, security_level, password, message_content,)
+        if state:
+            state, message = get_top_messages(user_id, chat_id, security_level, password,)
+            emit('return_message_submission', message)
+            _, message = get_top_messages(user_id, chat_id, security_level, password)
+            emit('return_message_list', message, to=chat_id)
         else:
-            state, message = save_message(user_id, chat_id, security_level, password, message_content,)
-            if state:
-                state, message = get_top_messages(user_id, chat_id, security_level, password,)
-                emit('return_message_submission', message)
-                _, message = get_top_messages(user_id, chat_id, security_level, password)
-                emit('return_message_list', message, to=chat_id)
-            else:
-                emit('error_message_submission', message)
-    
+            emit('error_message_submission', message)
+
     def on_check_filename(self, filename):
         try:
             filename = filename.split('/')[-1]

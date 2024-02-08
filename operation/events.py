@@ -15,6 +15,7 @@ class OperationNamespace(Namespace):
         try:
             status, message = create_chat(user_id=userId, chat_name=chatName, chat_description=chatDescription, security_level=securityLevel, list_of_users=listOfUsers, general_read=generalRead, general_write=generalWrite, password=userPassword)
             if status:
+                print(message)
                 emit('return_chat_creation', message)
             else:
                 emit('error_chat_creation', message)
