@@ -10,21 +10,19 @@ from file_scan.events import FileScanNamespace
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-
-socketio.on_namespace(AuthenticateNamespace('/auth'))
-socketio.on_namespace(ChatNamespace('/chat'))
-socketio.on_namespace(OperationNamespace('/operation'))
-socketio.on_namespace(LogsNamespace('/log'))
-socketio.on_namespace(FileScanNamespace('/filescan'))
-    
+socketio.on_namespace(AuthenticateNamespace("/auth"))
+socketio.on_namespace(ChatNamespace("/chat"))
+socketio.on_namespace(OperationNamespace("/operation"))
+socketio.on_namespace(LogsNamespace("/log"))
+socketio.on_namespace(FileScanNamespace("/filescan"))
 
 
 @app.route("/")
 def default():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
 @app.route("/ping")
@@ -33,4 +31,4 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, port=5000)
+    socketio.run(app=app, port=5000, debug=True)

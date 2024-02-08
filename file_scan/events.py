@@ -11,9 +11,6 @@ class FileScanNamespace(Namespace):
 
     def on_queue_file(self, data):
         self.filequeue.enqueue(data)
-        threading.Thread(target=self.process_queue).start()
-
-    def process_queue(self):
         while not self.filequeue.is_empty():
             file_data = self.filequeue.dequeue()
             state, log, counter = self.run_file_scan(file_data)
