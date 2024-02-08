@@ -1,6 +1,7 @@
 from flask_socketio import Namespace, emit
 from authenticate.utils import login_check, logout, verify_chat_user
-
+import json
+from utils.cryptography import encrypt_data
 
 class AuthenticateNamespace(Namespace):
     def on_login(self, data):

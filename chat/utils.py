@@ -149,8 +149,10 @@ def return_file(chat_id, password, file_security, filename):
     if not user:
         return False, "Incorrect User information."
     try:
-        file = pyrestorage.child(f'files/{chat_id}/{file_security}/{filename}').download(user['idToken'])
-        return True, file
+        url = pyrestorage.child(filename).get_url(user['idToken'])
+        # if file_security != "Open":
+        #     url = encrypt_data(url, chat_id[:4]+password+chat_id[4:])
+        return True, url
     except:
         return False, "Error in obtaining file."
     

@@ -1,8 +1,9 @@
-from flask_socketio import Namespace, emit, join_room, send, leave_room, rooms
+from flask_socketio import Namespace, emit, join_room, leave_room
 from utils.data_class_model import *
-from .utils import auth, db, get_top_messages, text_scanning, save_message, return_file, reflect_all_chats, get_signed_url
-from utils.cryptography import generate_key, sha256_hash_bytes
+from .utils import auth, db, get_top_messages, save_message, return_file, reflect_all_chats, get_signed_url
+from utils.cryptography import generate_key, sha256_hash_bytes, encrypt_data
 import uuid
+import json
 
 
 
@@ -17,6 +18,7 @@ class ChatNamespace(Namespace):
         if password == False:
             password = 'false'
         state, message = get_top_messages(user_id, chat_id, security_level, password)
+        # message = encrypt_data(json.dumps(message))
         if state:
             try:
                 room_name = self.user_rooms[user_id]
@@ -41,10 +43,13 @@ class ChatNamespace(Namespace):
         state, message = save_message(user_id, chat_id, security_level, password, message_content)
         if state:
             state, message = get_top_messages(user_id, chat_id, security_level, password,)
+            # message = encrypt_data(json.dumps(message))
             emit('return_message_submission', message)
             _, message = get_top_messages(user_id, chat_id, security_level, password)
+            # message = encrypt_data(json.dumps(message))
             emit('return_message_list', message, to=chat_id)
         else:
+            # message = encrypt_data(json.dumps(message))
             emit('error_message_submission', message)
     
     def on_check_filename(self, filename):
@@ -58,10 +63,13 @@ class ChatNamespace(Namespace):
                     levels = levels[count:]
                     break
                 count += 1
+            # message = encrypt_data(json.dumps(levels))
             emit('return_filename_check', levels)
             return
         except:
-            emit('error_filename_check', "Error occured.")
+            message = "Error occured."
+            # message = encrypt_data(json.dumps(message))
+            emit('error_filename_check', message)
             return
     
     def on_file_upload(self, data):
@@ -91,18 +99,23 @@ class ChatNamespace(Namespace):
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, 'false')
             if status:
-                emit('return_file_upload', {"url":url, "password":file_password}, headers={
-             'Access-Control-Allow-Origin': 'http://localhost:3000',
-             'Access-Control-Allow-Methods': ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-             'Access-Control-Allow-Headers': 'Content-Type'
-         })
-                emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
+                message = {"url":url, "password":file_password}
+                # message = encrypt_data(json.dumps(message))
+                emit('return_file_upload', message)
+                message = {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}
+                # message = encrypt_data(json.dumps(message))
+                emit('queue_file', message, namespace="filescan")
                 _, message = get_top_messages(user_id, chat_id, security_level, password)
+                # message = encrypt_data(json.dumps(message))
                 emit('return_message_list', message, to=chat_id)
             else:
-                emit('error_file_upload', 'Error in handling message')
+                message = 'Error in handling message'
+                # message = encrypt_data(json.dumps(message))
+                emit('error_file_upload', message)
         else:
-            emit('inappropriate_level', granted_level[0])
+            message = granted_level[0]
+            # message = encrypt_data(json.dumps(message))
+            emit('inappropriate_level', message)
 
     def on_request_file(self, data):
         chat_id = data.get('chatId')
@@ -116,17 +129,23 @@ class ChatNamespace(Namespace):
             chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
             file_password_hash = db.child("chats").child(chat_id).child(security_level).child('chat_history').child(message_id).child('content').child('file_password').get(token=chat['idToken']).val()
         except:
-            emit('error_request_file', "Incorrect credentials")
+            message = "Incorrect credentials"
+            # message = encrypt_data(json.dumps(message))
+            emit('error_request_file', message)
         encrypted_password = sha256_hash_bytes(chat_id+file_password+password)
         if encrypted_password == file_password_hash:
-            file = return_file(chat_id, password, file_security, filename)
-            emit('return_request_file', file)
+            _, message = return_file(chat_id, password, file_security, filename)
+            # message = encrypt_data(json.dumps(message))
+            emit('return_request_file', message)
         else:
-            emit('error_request_file', "Incorrect password")
+            message = "Incorrect password"
+            # message = encrypt_data(json.dumps(message))
+            emit('error_request_file', )
         
     def on_reflect_all_chats(self, data):
         user_id = data.get("userId")
         status, message = reflect_all_chats(user_id, data.get("password"))
+        # message = encrypt_data(json.dumps(message))
         if status:
             emit('return_all_chats', message)
         else:
