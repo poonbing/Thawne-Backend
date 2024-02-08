@@ -9,8 +9,8 @@ from file_scan.events import FileScanNamespace
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="https://localhost:3000")
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     socketio.on_namespace(OperationNamespace('/operation'))
     socketio.on_namespace(LogsNamespace('/log'))
     socketio.on_namespace(FileScanNamespace('/filescan'))
-    socketio.run(app=app)
+    socketio.run(app=app, port=5000)
 
 
 @app.route("/")

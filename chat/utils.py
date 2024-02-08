@@ -61,9 +61,11 @@ def get_top_messages(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        # if password != 'false':
-        #     for message_data in message_list:
-        #         message_data["content"] = decrypt_data(message_data["content"], password)
+        if password != 'false':
+            print(message_list)
+            for message_data in message_list:
+                message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
+        print(message_list)
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"
@@ -102,10 +104,10 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             "sent_from": {user_id: status[user_id]},
         }
         if message_content:
-            if password != 'false':
-                message_content = encrypt_data(message_content, password)
-            new_message['content'] = message_content
-        if file:
+             if password != 'false':
+                 message_content = encrypt_data(message_content, password)
+        new_message['content'] = message_content
+        if filename:
             new_message["content"] = {
                 "filename": filename,
                 "file_security": file_security,
