@@ -63,7 +63,10 @@ def get_top_messages(user_id, chat_id, security_level, password):
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
         if password != 'false':
             for message_data in message_list:
-                message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
+                try:
+                    message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
+                except:
+                    message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"
@@ -86,7 +89,7 @@ def text_scanning(text):
                 print('Matched:', matched_word)
                 return matched_word
             
-def save_message(user_id, chat_id, security_level, password, message_content):
+def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
@@ -101,10 +104,21 @@ def save_message(user_id, chat_id, security_level, password, message_content):
             "date": timestamp,
             "sent_from": {user_id: status[user_id]},
         }
+        if file:
+            new_message["content"] = {
+                "file_password": file_password,
+                "file_security":file_security,
+                "filename":filename
+            }
         if message_content:
+            if file:
+                message_content = filename
             if password != 'false':
                 message_content = encrypt_data(message_content, password)
-            new_message['content'] = message_content
+            if file:
+                new_message['content']['filename'] = message_content
+            else:
+                new_message['content'] = message_content
         try:
             message_list = chat_info["chat_history"]
             message_list[new_message_count] = new_message
