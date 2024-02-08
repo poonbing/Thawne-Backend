@@ -93,8 +93,8 @@ class ChatNamespace(Namespace):
             if status:
                 emit('return_file_upload', {"url":url, "password":file_password}, headers={
              'Access-Control-Allow-Origin': 'http://localhost:3000',
-             'Access-Control-Allow-Methods': 'PUT',  # Specify the allowed methods
-             'Access-Control-Allow-Headers': 'Content-Type'  # Specify the allowed headers
+             'Access-Control-Allow-Methods': ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+             'Access-Control-Allow-Headers': 'Content-Type'
          })
                 emit('queue_file', {"user_id":user_id, "password":password, "filename":filename, "file_security":file_security}, namespace="filescan")
                 _, message = get_top_messages(user_id, chat_id, security_level, password)
