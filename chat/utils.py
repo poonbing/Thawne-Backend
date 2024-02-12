@@ -8,6 +8,11 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 import mimetypes
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import hashlib
+import base64
+import bcrypt
 
 firebase_config = {
     "apiKey": "AIzaSyCslAm25aJkWReYOOXV8YNAGzsCVRLkxeM",
@@ -40,6 +45,8 @@ db = firebase.database()
 pyrestorage = firebase.storage()
 cred = credentials.Certificate(server_account)
 firebase_admin.initialize_app(cred)
+nltk.download('stopwords')
+nltk.download('punkt')
 
 
 def verify_chat_user(user_id, chat_id, security_level, password):
@@ -66,10 +73,27 @@ def get_top_messages(user_id, chat_id, security_level, password):
             if message_list:
                 for message_data in message_list:
                     try:
-                        if message_list[message_data]["content"]["file_security"] != "Open":
-                            message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
-                    except:
-                        message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
+                        file_security = message_list[message_data]["content"]["file_security"]
+                        filename = message_list[message_data]["content"]["filename"]
+                        print(filename)
+                        if file_security != "Open":
+                            filename = decrypt_data(filename, password)
+                            message_list[message_data]["content"]["filename"] = filename
+                        try:
+                            bucket = storage.bucket("thawne-d1541.appspot.com")
+                            blob = bucket.blob(filename)
+                            blob.make_public()
+                            url = blob.public_url
+                            print(url)
+                            message_list[message_data]["content"]["url"] = url
+                        except Exception as e:
+                            print(e)
+                            message_list[message_data]["content"]["url"] = "FAILED"
+                    except Exception as e:
+                        print(e)
+                        encrypted_text = message_list[message_data]["content"]
+                        decrypted_text = decrypt_data(encrypted_text, password)
+                        message_list[message_data]["content"] = decrypted_text
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"
@@ -93,6 +117,7 @@ def text_scanning(text):
                 return matched_word
             
 def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
+    print("yes")
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
@@ -129,6 +154,7 @@ def save_message(user_id, chat_id, security_level, password, message_content, fi
             message_list = {new_message_count:new_message}
         db.child("chats").child(chat_id).child(security_level).child("chat_history").set(message_list, token=chat['idToken'])
         db.child("chats").child(chat_id).child(security_level).child("message_count").set(new_message_count, token=chat['idToken'])
+        print("Save complete")
         return True, new_message_id
     except Exception as e:
         return False, f"Error in message saving.{e}"
