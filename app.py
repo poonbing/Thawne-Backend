@@ -2,6 +2,7 @@ from flask import Flask, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from authenticate.events import AuthenticateNamespace
+from authenticate.utils import login_check
 from chat.events import ChatNamespace
 from operation.events import OperationNamespace
 from logs.events import LogsNamespace
@@ -30,6 +31,15 @@ def default():
 def hello_world():
     return "pong"
 
+# @app.route("/login")
+# def Login(data):
+#     user_id = data.get("userId")
+#     password = data.get("pass")
+#     level = login_check(user_id, password)
+#     if level == "master":
+#         return render_template()
+#     else:
+#         return render_template()
 
 
 if __name__ == "__main__":
