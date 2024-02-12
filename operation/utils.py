@@ -88,37 +88,41 @@ def delete_chat(user_id, password, chat_id):
     except:
         return False, "Error in removing chat"
     
-def queue_chat_request(user_id, password, action, chat_name, chat_description=None, security_level=None, list_of_users=None, general_read=True, general_write=True,):
+def queue_chat_request(user_id, password, action, chat_name, chat_description=None, security_level=None, list_of_users=None, general_read=True, general_write=True):
     try:
         user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-        try:
-            request_count = db.child("chat queue").child("queue_count").get(token=user["idToken"]).val() + 1
-            queue_count = db.child("chat queue").child("request_count").get(token=user["idToken"]).val() + 1
-        except:
-            request_count, queue_count = 1
-        request = {(request_count):{
-                "action":action,
-                "chat_name": chat_name,
-            }}
-        if action == "Create":
-            request["chat_description"] = chat_description
-            request[request_count]["security_level"] = security_level
-            request[request_count]["list_of_users"] = list_of_users
-            request[request_count]["general_read"] = general_read
-            request[request_count]["general_write"] = general_write
-        elif action == "Delete":
-            pass
-        db.child("chat queue").child("queue").update(request, token=user["idToken"])
-        db.child("chat queue").child("queue_count").update(queue_count, token=user["idToken"])
-        db.child("chat queue").child("request_count").update(request_count, token=user["idToken"])
-        return True, "Queue Successfully Added."
+        level = db.child("users").child(user["localId"]).child("level").get(token=user["idToken"]).val()
+        if level != "user":
+            try:
+                request_count = db.child("chat queue").child("queue_count").get(token=user["idToken"]).val() + 1
+                queue_count = db.child("chat queue").child("request_count").get(token=user["idToken"]).val() + 1
+            except:
+                request_count, queue_count = 1
+            request = {(request_count):{
+                    "action":action,
+                    "chat_name": chat_name,
+                }}
+            if action == "Create":
+                request["chat_description"] = chat_description
+                request[request_count]["security_level"] = security_level
+                request[request_count]["list_of_users"] = list_of_users
+                request[request_count]["general_read"] = general_read
+                request[request_count]["general_write"] = general_write
+            elif action == "Delete":
+                pass
+            db.child("chat queue").child("queue").update(request, token=user["idToken"])
+            db.child("chat queue").child("queue_count").update(queue_count, token=user["idToken"])
+            db.child("chat queue").child("request_count").update(request_count, token=user["idToken"])
+            return True, "Queue Successfully Added."
+        else:
+            return False, "User not authorized to create chats."
     except Exception as e:
         return False, e
 
 def resolve_chat_queue(user_id, password, request_id):
     try:
         user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-        request = db.child("chat_queue").child("queue").child(request_id).get(token=user["idToken"]).val()
+        request = db.child("chat queue").child("queue").child(request_id).get(token=user["idToken"]).val()
         if request["action"] == "Create":
             state, message = create_chat(user_id, 
                         password, 
@@ -128,6 +132,8 @@ def resolve_chat_queue(user_id, password, request_id):
                         list_of_users=request["list_of_users"], 
                         general_read=request["general_read"], 
                         general_write=request["general_write"])
+            request["Approved by"] = user_id
+            db.child("chat queue").child("history").child(request_id).update(request, user["idToken"])
         elif request["action"] == "Delete":
             state, message = delete_chat(user_id, password, request["chat_name"])
         if state:
