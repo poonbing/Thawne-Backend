@@ -30,3 +30,34 @@ dict = {"chat name":{"chat id": "chat password"},
 "Very Secretive Channel":{"T255951T":"TT2943"},
 "NYP SIT Club":{"O112748N":"false"},
 }
+
+def queue_chat_request(user_id, password, action, chat_name, chat_description=None, security_level=None, list_of_users=None, general_read=True, general_write=True):
+    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+    level = db.child("users").child(user["localId"]).child("level").get(token=user["idToken"]).val()
+    if level != "user":
+        try:
+            request_count = db.child("chat queue").child("queue_count").get(token=user["idToken"]).val() + 1
+            queue_count = db.child("chat queue").child("request_count").get(token=user["idToken"]).val() + 1
+        except:
+            request_count = 1
+            queue_count = 1
+        request = {
+                "action":action,
+                "chat_name": chat_name,
+            }
+        if action == "Create":
+            request["chat_description"] = chat_description
+            request["security_level"] = security_level
+            request["list_of_users"] = list_of_users
+            request["general_read"] = general_read
+            request["general_write"] = general_write
+        elif action == "Delete":
+            pass
+        db.child("chat queue").child("queue").child(request_count).update(request, token=user["idToken"])
+        db.child("chat queue").child("queue_count").update(queue_count, token=user["idToken"])
+        db.child("chat queue").child("request_count").update(request_count, token=user["idToken"])
+        return True, "Queue Successfully Added."
+    else:
+        return False, "User not authorized to create chats."
+    
+print(queue_chat_request("UM77682", "poonbing@root", "create", "You suck"))
