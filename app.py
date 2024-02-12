@@ -14,7 +14,6 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
 
 
-
 socketio.on_namespace(AuthenticateNamespace("/auth"))
 socketio.on_namespace(ChatNamespace("/chat"))
 socketio.on_namespace(OperationNamespace("/operation"))
@@ -25,21 +24,6 @@ socketio.on_namespace(FileScanNamespace("/filescan"))
 @app.route("/")
 def default():
     return render_template("index.html")
-
-
-@app.route("/ping")
-def hello_world():
-    return "pong"
-
-# @app.route("/login")
-# def Login(data):
-#     user_id = data.get("userId")
-#     password = data.get("pass")
-#     level = login_check(user_id, password)
-#     if level == "master":
-#         return render_template()
-#     else:
-#         return render_template()
 
 
 if __name__ == "__main__":
