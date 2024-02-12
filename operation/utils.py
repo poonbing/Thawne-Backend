@@ -180,7 +180,8 @@ def queue_chat_request(
                     + 1
                 )
             except:
-                request_count, queue_count = 1
+                request_count = 1
+                queue_count = 1
             request = {
                 (request_count): {
                     "action": action,
@@ -196,10 +197,10 @@ def queue_chat_request(
             elif action == "Delete":
                 pass
             db.child("chat queue").child("queue").update(request, token=user["idToken"])
-            db.child("chat queue").child("queue_count").update(
+            db.child("chat queue").child("queue_count").set(
                 queue_count, token=user["idToken"]
             )
-            db.child("chat queue").child("request_count").update(
+            db.child("chat queue").child("request_count").set(
                 request_count, token=user["idToken"]
             )
             return True, "Queue Successfully Added."
@@ -295,17 +296,18 @@ def queue_augment_user(user_id, password, subject_user_id, keyword):
                 + 1
             )
         except:
-            request_count, queue_count = 1
+            request_count = 1
+            queue_count = 1
         request = {
             request_count: {"subject_user_id": subject_user_id, "keyword": keyword}
         }
         db.child("user augment queue").child("queue").update(
             request, token=user["idToken"]
         )
-        db.child("user augment queue").child("queue_count").update(
+        db.child("user augment queue").child("queue_count").set(
             queue_count, token=user["idToken"]
         )
-        db.child("user augment queue").child("request_count").update(
+        db.child("user augment queue").child("request_count").set(
             request_count, token=user["idToken"]
         )
     except Exception as e:
