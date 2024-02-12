@@ -115,24 +115,25 @@ def queue_chat_request(user_id, password, action, chat_name, chat_description=No
     except Exception as e:
         return False, e
 
-def resolve_chat_queue(user_id, password, request_id):
+def resolve_chat_queue(user_id, password, request_id, approval):
     try:
-        user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-        request = db.child("chat_queue").child("queue").child(request_id).get(token=user["idToken"]).val()
-        if request["action"] == "Create":
-            state, message = create_chat(user_id, 
-                        password, 
-                        chat_name=request["chat_name"], 
-                        chat_description=request["chat_description"], 
-                        security_level=request["security_level"], 
-                        list_of_users=request["list_of_users"], 
-                        general_read=request["general_read"], 
-                        general_write=request["general_write"])
-        elif request["action"] == "Delete":
-            state, message = delete_chat(user_id, password, request["chat_name"])
-        if state:
-            return True, message
-        return False, message
+        if approval == "Approve":
+            user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
+            request = db.child("chat_queue").child("queue").child(request_id).get(token=user["idToken"]).val()
+            if request["action"] == "Create":
+                state, message = create_chat(user_id, 
+                            password, 
+                            chat_name=request["chat_name"], 
+                            chat_description=request["chat_description"], 
+                            security_level=request["security_level"], 
+                            list_of_users=request["list_of_users"], 
+                            general_read=request["general_read"], 
+                            general_write=request["general_write"])
+            elif request["action"] == "Delete":
+                state, message = delete_chat(user_id, password, request["chat_name"])
+            if state:
+                return True, message
+            return False, message
     except Exception as e:
         return False, e
 
@@ -179,3 +180,24 @@ def resolve_augment_user(user_id, password, request_id):
         return False, message
     except Exception as e:
         return False, e
+def retrieve_chat_queue(user_id, password):
+    try:
+        user = auth.sign_in_with_email_and_password(
+            user_id.lower() + "@thawne.com",
+            generate_key(user_id.lower(), password.lower())[:20],
+        )
+        history = db.child("chat queue").child("queue").get(token=user["idToken"]).val()
+        return True, history
+    except Exception as e:
+        return False, e
+
+def retrieve_user_augment_queue(user_id, password):
+    try:
+        user = auth.sign_in_with_email_and_password(
+            user_id.lower() + "@thawne.com",
+            generate_key(user_id.lower(), password.lower())[:20],
+        )
+        history = db.child("user augment queue").child("queue").get(token=user["idToken"]).val()
+        return True, history
+    except Exception as e:
+      return False, e
