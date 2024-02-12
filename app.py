@@ -5,8 +5,9 @@ from authenticate.events import AuthenticateNamespace
 from authenticate.utils import login_check
 from chat.events import ChatNamespace
 from operation.events import OperationNamespace
-from logs.events import LogsNamespace
+from logs.events import LogsNamespace, DataLayer
 from file_scan.events import FileScanNamespace
+from logs.report import ReportGeneration
 
 
 app = Flask(__name__)
@@ -19,6 +20,7 @@ socketio.on_namespace(ChatNamespace("/chat"))
 socketio.on_namespace(OperationNamespace("/operation"))
 socketio.on_namespace(LogsNamespace("/log"))
 socketio.on_namespace(FileScanNamespace("/filescan"))
+report = ReportGeneration(app, DataLayer("thawne.owner", "UM77682@root"))
 
 
 @app.route("/")
@@ -27,4 +29,4 @@ def default():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, port=5000, debug=True)
+    socketio.run(app=app)

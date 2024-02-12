@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+    <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+      }
+      body {
+        font-family: Helvetica;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1 {
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: black;
+        padding: 30px 0;
+      }
+
+      .piechart {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      }
+
+      /* Table Styles */
+
+      .table-wrapper {
+        margin: 10px 70px 70px;
+        box-shadow: 0px 35px 50px rgba(0, 0, 0, 0.2);
+      }
+
+      .fl-table {
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: normal;
+        border: none;
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 100%;
+        white-space: nowrap;
+        background-color: white;
+      }
+
+      .fl-table td,
+      .fl-table th {
+        text-align: center;
+        padding: 8px;
+      }
+
+      .fl-table td {
+        border-right: 1px solid #f8f8f8;
+        font-size: 12px;
+      }
+
+      .fl-table thead th {
+        color: #ffffff;
+        background: #4fc3a1;
+      }
+
+      .fl-table thead th:nth-child(odd) {
+        color: #ffffff;
+        background: #324960;
+      }
+
+      .fl-table tr:nth-child(even) {
+        background: #f8f8f8;
+      }
+
+      /* Responsive */
+
+      @media (max-width: 767px) {
+        .fl-table {
+          display: block;
+          width: 100%;
+        }
+        .table-wrapper:before {
+          content: "Scroll horizontally >";
+          display: block;
+          text-align: right;
+          font-size: 11px;
+          color: white;
+          padding: 0 0 10px;
+        }
+        .fl-table thead,
+        .fl-table tbody,
+        .fl-table thead th {
+          display: block;
+        }
+        .fl-table thead th:last-child {
+          border-bottom: none;
+        }
+        .fl-table thead {
+          float: left;
+        }
+        .fl-table tbody {
+          width: auto;
+          position: relative;
+          overflow-x: auto;
+        }
+        .fl-table td,
+        .fl-table th {
+          padding: 20px 0.625em 0.625em 0.625em;
+          height: 60px;
+          vertical-align: middle;
+          box-sizing: border-box;
+          overflow-x: hidden;
+          overflow-y: auto;
+          width: 120px;
+          font-size: 13px;
+          text-overflow: ellipsis;
+        }
+        .fl-table thead th {
+          text-align: left;
+          border-bottom: 1px solid #f7f7f9;
+        }
+        .fl-table tbody tr {
+          display: table-cell;
+        }
+        .fl-table tbody tr:nth-child(odd) {
+          background: none;
+        }
+        .fl-table tr:nth-child(even) {
+          background: transparent;
+        }
+        .fl-table tr td:nth-child(odd) {
+          background: #f8f8f8;
+          border-right: 1px solid #e6e4e4;
+        }
+        .fl-table tr td:nth-child(even) {
+          border-right: 1px solid #e6e4e4;
+        }
+        .fl-table tbody td {
+          display: block;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Log history</h1>
+    <div class="table-wrapper">
+      <table class="fl-table">
+        <thead>
+          <tr>
+            <th>timestamp</th>
+            <th>user</th>
+            <th>location of activity</th>
+            <th>type of activity</th>
+            <th>context of activity</th>
+            <th>Accept</th>
+            <th>Reject</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>2024-01-29 03:45:52</td>
+            <td>UU26473</td>
+            <td>O112748N</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: {his credit card number}</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 13:00:29</td>
+            <td>UU26473</td>
+            <td>O152748N</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: offensive image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 13:00:30</td>
+            <td>UU26473</td>
+            <td>O156677N</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: phone number</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 13:00:30</td>
+            <td>UU26473</td>
+            <td>O143378H</td>
+            <td>malware attack</td>
+            <td>DDos attack on us </td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 13:00:30</td>
+            <td>UU26473</td>
+            <td>O159998N</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: confidential image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:24</td>
+            <td>UU26473</td>
+            <td>O123456A</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: offensive image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:24</td>
+            <td>UU26473</td>
+            <td>O789012B</td>
+            <td>malware attack</td>
+            <td>Trojan detected</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:24</td>
+            <td>UU26473</td>
+            <td>O345678C</td>
+            <td>malware attack</td>
+            <td>DDos attack on us </td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:25</td>
+            <td>UU26473</td>
+            <td>O901234D</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: confidential image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:25</td>
+            <td>UU26473</td>
+            <td>O567890E</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: offensive image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:25</td>
+            <td>UU26473</td>
+            <td>O234567F</td>
+            <td>Virus</td>
+            <td>Virus detected</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:26</td>
+            <td>UU26473</td>
+            <td>O890123G</td>
+            <td>Virus</td>
+            <td>Virus detected </td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-06 16:39:26</td>
+            <td>UU26473</td>
+            <td>O456789H</td>
+            <td>Breach of Security Policy</td>
+            <td>Uploaded sensitive content: confidential image</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-10 04:55:57</td>
+            <td>UA25399</td>
+            <td></td>
+            <td>Message sent.</td>
+            <td>Sensitive data sent in Open channel</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-10 05:46:03</td>
+            <td>UA25399</td>
+            <td>SensitiveChannel</td>
+            <td>Chat login</td>
+            <td>Failed login attempt</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-12 09:44:49</td>
+            <td>UA25399</td>
+            <td>Sensitive Channel</td>
+            <td>Chat login</td>
+            <td>Failed login attempt</td>
+            <td><button></button></td>
+          </tr>
+          
+          <tr>
+            <td>2024-02-12 09:44:53</td>
+            <td>UA25399</td>
+            <td>Sensitive Channel</td>
+            <td>Chat login</td>
+            <td>Failed login attempt</td>
+            <td><button></button></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    <div id="piechart" class="piechart">
+      <h2>Count of Unique Offense</h2>
+      <canvas id="chart" width="600" height="400"></canvas>
+      <script>
+        var pieData = [
+          
+            {
+              value: 8,
+              label: "Breach of Security Policy",
+              color : "#F7464A"
+            },
+          
+            {
+              value: 3,
+              label: "malware attack",
+              color : "#46BFBD"
+            },
+          
+            {
+              value: 2,
+              label: "Virus",
+              color : "#FDB45C"
+            },
+          
+            {
+              value: 1,
+              label: "Message sent.",
+              color : "#FEDCBA"
+            },
+          
+            {
+              value: 3,
+              label: "Chat login",
+              color : "#ABCDEF"
+            },
+          
+        ];
+
+        // get bar chart canvas
+        var mychart = document.getElementById("chart").getContext("2d");
+        steps = 10
+        max = 17000
+
+        // draw pie chart
+        new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
+      </script>
+    </div>
+    <div id="full-report" class="full-report">
+      
+      <!-- This element will only be shown if my_variable is not None -->
+      <div>
+        <a href="https://thawne-backend-7skvo7hmpa-uc.a.run.app/log_generation/207462">Full Report</a>
+      </div>
+      
+    </div>
+  </body>
+</html>
