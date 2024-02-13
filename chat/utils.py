@@ -69,31 +69,32 @@ def get_top_messages(user_id, chat_id, security_level, password):
     try:
         chat = auth.sign_in_with_email_and_password(chat_id.lower()+"@thawne.com", generate_key(chat_id.lower(), password.lower())[:20])
         message_list = db.child("chats").child(chat_id).child(security_level).child("chat_history").get(token=chat['idToken']).val()
-        if password != 'false':
-            if message_list:
-                for message_data in message_list:
+        if message_list:
+            for message_data in message_list:
+                try:
+                    file_security = message_list[message_data]["content"]["file_security"]
+                    filename = message_list[message_data]["content"]["filename"]
+                    print(filename)
+                    if file_security != "Open":
+                        filename = decrypt_data(filename, password)
+                        message_list[message_data]["content"]["filename"] = filename
                     try:
-                        file_security = message_list[message_data]["content"]["file_security"]
-                        filename = message_list[message_data]["content"]["filename"]
-                        print(filename)
-                        if file_security != "Open":
-                            filename = decrypt_data(filename, password)
-                            message_list[message_data]["content"]["filename"] = filename
-                        try:
-                            bucket = storage.bucket("thawne-d1541.appspot.com")
-                            blob = bucket.blob(filename)
-                            blob.make_public()
-                            url = blob.public_url
-                            print(url)
-                            message_list[message_data]["content"]["url"] = url
-                        except Exception as e:
-                            print(e)
-                            message_list[message_data]["content"]["url"] = "FAILED"
+                        bucket = storage.bucket("thawne-d1541.appspot.com")
+                        blob = bucket.blob(filename)
+                        blob.make_public()
+                        url = blob.public_url
+                        print(url)
+                        message_list[message_data]["content"]["url"] = url
                     except Exception as e:
                         print(e)
+                        message_list[message_data]["content"]["url"] = "FAILED"
+                except Exception as e:
+                    print(e)
+                    if password != 'false':
                         encrypted_text = message_list[message_data]["content"]
                         decrypted_text = decrypt_data(encrypted_text, password)
                         message_list[message_data]["content"] = decrypted_text
+
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"
