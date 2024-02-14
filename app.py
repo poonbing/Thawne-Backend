@@ -13,7 +13,7 @@ from file_scan.events import FileScanNamespace
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 socketio.on_namespace(AuthenticateNamespace("/auth"))

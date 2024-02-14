@@ -8,7 +8,7 @@ class OperationNamespace(Namespace):
         userId = data.get("userId")
         chatName = data.get("chatName")
         chatDescription = data.get("chatDescription")
-        action = "create"
+        action = "Create"
         securityLevel = data.get("securityLevel")
         listOfUsers = data.get("listOfUsers")
         generalRead = data.get("generalRead")

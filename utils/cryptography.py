@@ -38,6 +38,7 @@ def decrypt_data(encrypted_data, key):
     key = hashlib.sha256(key.encode('utf-8')).digest()
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
+    print(decrypt_data)
     return decrypted_data.decode('utf-8')
 
 def sha256_hash_bytes(input_string):

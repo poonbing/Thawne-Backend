@@ -1,5 +1,5 @@
 import pyrebase
-import datetime
+from datetime import datetime
 from utils.cryptography import generate_key
 
 firebase_config = {

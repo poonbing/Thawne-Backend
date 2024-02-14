@@ -92,7 +92,7 @@ class ChatNamespace(Namespace):
         print(levels)
         if file_security in levels:
             if password == False:
-                password = 'False'
+                password = 'false'
                 encrypted_password = 'False'
             if file_security != "Open":
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
