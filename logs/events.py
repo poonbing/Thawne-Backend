@@ -1,7 +1,6 @@
 from flask_socketio import Namespace, emit
 from .utils import log_event, retrieve_log_queue
-import json
-from utils.cryptography import encrypt_data
+from flask import render_template
 
 
 class LogsNamespace(Namespace):
@@ -23,3 +22,7 @@ class LogsNamespace(Namespace):
     
     def on_retrieve_new_logs(self, data):
         status, message = retrieve_log_queue(data.get('userId'), data.get('password'))
+        if status:
+            emit('return_new_logs', message)
+        else:
+            emit('error_new_logs', message)

@@ -1,8 +1,7 @@
-import uuid
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import hashlib
-import os
 import base64
 import bcrypt
 
@@ -25,14 +24,17 @@ def encrypt_data(data, key):
     key = hashlib.sha256(key.encode('utf-8')).digest()
     cipher = AES.new(key, AES.MODE_GCM)
     ciphertext, tag = cipher.encrypt_and_digest(data)
-    return base64.b64encode(cipher.nonce + tag + ciphertext).decode('utf-8')
+    encrypted = base64.b64encode(cipher.nonce + tag + ciphertext)
+    encrypted_data = encrypted.decode('utf-8')
+    return encrypted_data
 
 
 def decrypt_data(encrypted_data, key):
-    encrypted_data = base64.b64decode(encrypted_data.encode('utf-8'))
-    nonce = encrypted_data[:16]
-    tag = encrypted_data[16:32]
-    ciphertext = encrypted_data[32:]
+    encrypted = encrypted_data.encode('utf-8')
+    cipher_object = base64.b64decode(encrypted)
+    nonce = cipher_object[:16]
+    tag = cipher_object[16:32]
+    ciphertext = cipher_object[32:]
     key = hashlib.sha256(key.encode('utf-8')).digest()
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)

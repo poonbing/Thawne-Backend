@@ -5,6 +5,7 @@ from utils.cryptography import encrypt_data
 
 class AuthenticateNamespace(Namespace):
     def on_login(self, data):
+        print(data)
         user_id = None
         password = None
         if "username" in data and "password" in data:

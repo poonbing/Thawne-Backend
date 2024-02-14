@@ -81,7 +81,6 @@ class ChatNamespace(Namespace):
         file_security = data.get('fileSecurity')
         file_password = "false"
         filename = filename.split('/')[-1]
-        url = get_signed_url(filename)
         granted_level = predict_class_level(filename)
         levels = ["Top Secret", "Sensitive", "Open"]
         count = 0
@@ -99,6 +98,7 @@ class ChatNamespace(Namespace):
                 file_password = filename[:1].upper() + filename[-1:].upper() + str(uuid.uuid4().int)[:4]
             status, _ = save_message(user_id, chat_id, security_level, password, False, True, filename, file_security, 'false')
             if status:
+                url = get_signed_url(filename)
                 message = {"url":url, "password":file_password}
                 # message = encrypt_data(json.dumps(message))
                 emit('return_file_upload', message)
