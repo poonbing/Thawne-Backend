@@ -66,10 +66,15 @@ def get_top_messages(user_id, chat_id, security_level, password):
             if message_list:
                 for message_data in message_list:
                     try:
-                        if message_list[message_data]["content"]["file_security"] != "Open":
-                            message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"], password)
+                        print(message_list) 
+                        file_security = message_list[message_data]["content"]["file_security"]
+                        if file_security != "Open":
+                            message_list[message_data]["content"]["filename"] = decrypt_data(message_list[message_data]["content"]['filename'], password)
+                            
                     except:
+                        print(decrypt_data(message_list[message_data]["content"], password))
                         message_list[message_data]["content"] = decrypt_data(message_list[message_data]["content"], password)
+                        print(message_list)
         return True, message_list
     except Exception as e:
         return True, f"Chat does not have messages yet. {e}"

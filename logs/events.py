@@ -6,7 +6,15 @@ from utils.cryptography import encrypt_data
 
 class LogsNamespace(Namespace):
     def on_log_event(self, data):
-        status, message = log_event(data.get('userId'), data.get('password'), data.get('type'), data.get('location'), data.get('context'))
+        print(data)
+        userId = data.get('userId')
+        password = data.get('password')
+        type = data.get('type')
+        location = data.get('location')
+        context = data.get('context')
+        if password == False:
+            password = 'false'
+        status, message = log_event(userId, password, type, location, context)
         # message = encrypt_data(json.dumps(message))
         if status:
             emit('return_log_event', message)
