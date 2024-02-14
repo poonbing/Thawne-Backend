@@ -249,6 +249,7 @@ def resolve_chat_queue(user_id, password, request_id):
             )
         if state:
             db.child("chat queue").child("queue").child(request_id).remove(token=user["idToken"])
+            db.child("chat queue").child("history").child(request_id).update(request, token=user["idToken"])
             return True, message
         return False, message
     except Exception as e:

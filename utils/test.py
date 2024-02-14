@@ -49,12 +49,3 @@ dict = {"chat name":{"chat id": "chat password"},
 "Very Secretive Channel":{"T255951T":"TT2943"},
 "NYP SIT Club":{"O112748N":"false"},
 }
-
-def call(user_id, password, filename):
-    user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
-    bucket = storage.bucket("thawne-d1541.appspot.com")
-    blob = bucket.blob(filename)
-    blob.make_public()
-    blob.public_url
-
-call("UM77682", "poonbing@root", "Capture.PNG")
