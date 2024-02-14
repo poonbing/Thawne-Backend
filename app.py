@@ -12,7 +12,7 @@ from file_scan.events import FileScanNamespace
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -23,11 +23,11 @@ socketio.on_namespace(LogsNamespace("/log"))
 socketio.on_namespace(FileScanNamespace("/filescan"))
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["POST"])
 def default():
     return render_template("index.html")
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["POST"])
 def initiate_login():
     user_id = request.get('userId')
     password = request.get('pass')
@@ -35,28 +35,24 @@ def initiate_login():
     if status:
         return redirect(url_for("load_log_queue", request={'userId':user_id, 'pass':password}))
 
-@app.route("/viewlogs", methods=["GET", "POST"])
+@app.route("/viewlogs", methods=["POST"])
 def load_log_queue():
-    # user_id = request.get('userId')
-    # password = request.get('pass')
-    status, message = retrieve_log_queue("UM77682", "poonbing@root")
-    
+    user_id = request.get('userId')
+    password = request.get('pass')
+    status, message = retrieve_log_queue(user_id, password)
     if status:
         return render_template("logs.html", logs=message)
     
-@app.route("/chats", methods=["GET", "POST"])
+@app.route("/chats", methods=["POST"])
 def load_chat_requests():
-    # user_id = request.get('userId')
-    # password = request.get('pass')
-    status, message = retrieve_chat_queue("UM77682", "poonbing@root")
-    chat_queue = message
-    chat_queue_id = message[0]
-    chat_attributes = message[1]
+    user_id = request.get('userId')
+    password = request.get('pass')
+    status, message = retrieve_chat_queue(user_id, password)
     if status:
-        return render_template("chat_log.html", chat_queue=chat_queue, chat_queue_id=chat_queue_id, chat_attributes=chat_attributes)
+        return render_template("chat_log.html", requests=message)
 
 @app.route("/chat/resolve", methods=["POST"])
-def resolve_chat_requests(): 
+def resolve_chat_requests():
     user_id = request.get('userId')
     password = request.get('pass')
     request_id = request.get('reqId')
@@ -83,4 +79,4 @@ def resolve_user_augment_requests():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, debug=True)
+    socketio.run(app=app)
