@@ -179,6 +179,7 @@ def queue_chat_request(
                     .val()
                     + 1
                 )
+                username = db.child("users").child(user["localId"]).child("username").get(token=user["idToken"]).val()
             except:
                 request_count = 1
                 queue_count = 1
@@ -189,11 +190,14 @@ def queue_chat_request(
                 }
             }
             if action == "Create":
-                request["chat_description"] = chat_description
+                request[request_count]["chat_description"] = chat_description
                 request[request_count]["security_level"] = security_level
                 request[request_count]["list_of_users"] = list_of_users
                 request[request_count]["general_read"] = general_read
                 request[request_count]["general_write"] = general_write
+                request[request_count]["request_id"] = request_count
+                request[request_count]["request_user"] = username
+                request[request_count]["request_user_id"] = user_id
             elif action == "Delete":
                 pass
             db.child("chat queue").child("queue").update(request, token=user["idToken"])
@@ -245,6 +249,7 @@ def resolve_chat_queue(user_id, password, request_id):
             )
         if state:
             db.child("chat queue").child("queue").child(request_id).remove(token=user["idToken"])
+            db.child("chat queue").child("history").child(request_id).update(request, token=user["idToken"])
             return True, message
         return False, message
     except Exception as e:
