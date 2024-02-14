@@ -1,4 +1,4 @@
-{% extends "index.html" %}
+{% extends "layout.html" %}
 
 {% block content %}
 
@@ -7,24 +7,25 @@
   </div>
 
 
+  {% if logs %}
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="px-6 py-3">
-                    context of offense
+                    Context of activity
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    location of offense
+                    Location of activity
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    offender
+                    Identifier
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    timestamp
+                    Timestamp
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    type of offense
+                    Type of activity
                 </th>
                 
             </tr>
@@ -55,6 +56,11 @@
         </tbody>
     </table>
   </div>
+  {% else %}
+  <div class="text-center">
+    <p>No logs yet.</p>
+  </div>
+  {% endif %}
 
 
 {% endblock %}

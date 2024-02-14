@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from authenticate.events import AuthenticateNamespace
@@ -12,6 +12,7 @@ from file_scan.events import FileScanNamespace
 
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -49,20 +50,25 @@ def load_chat_requests():
     # user_id = request.get('userId')
     # password = request.get('pass')
     status, message = retrieve_chat_queue("UM77682", "poonbing@root")
-    chat_queue = message
-    chat_queue_id = message[0]
-    chat_attributes = message[1]
-    if status:
-        return render_template("chat_log.html", chat_queue=chat_queue, chat_queue_id=chat_queue_id, chat_attributes=chat_attributes)
+    print(message)
 
-@app.route("/chat/resolve", methods=["POST"])
-def resolve_chat_requests(): 
-    user_id = request.get('userId')
-    password = request.get('pass')
-    request_id = request.get('reqId')
-    status, _ = resolve_chat_queue(user_id, password, request_id)
+    chat_attributes = message
+    
+    return render_template("chat_log.html", chat_attributes=chat_attributes)
+    
+
+@app.route("/chat/resolve/<string:id>", methods=["GET", "POST"])
+def resolve_chat_requests(id): 
+    # user_id = request.get('userId')
+    # password = request.get('pass')
+    # request_id = request.get('reqId')
+    status, _ = resolve_chat_queue("UM77682", "poonbing@root", id)
     if status:
-        return redirect(url_for('load_chat_requests', request={'userId':user_id, 'pass':password}))
+        flash(f'Chat with id {id} has been created')
+        return redirect(url_for('load_chat_requests'))
+    else:
+        flash(f'Something went wrong.')
+        return redirect(url_for('load_chat_requests'))
     
 @app.route("/users", methods=["POST"])
 def load_user_augment_requests():
