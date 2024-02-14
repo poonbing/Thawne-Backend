@@ -46,7 +46,8 @@ def retrieve_log_queue(user_id, password):
     if user:
         try:
             logs = db.child("logs history").order_by_key().limit_to_first(40).get(token=user["idToken"]).val()
-            return True, logs
+            log_values = logs.values()
+            return True, log_values
         except:
             return True, "No logs in history."
     else:

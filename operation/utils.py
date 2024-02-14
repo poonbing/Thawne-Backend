@@ -348,7 +348,9 @@ def retrieve_chat_queue(user_id, password):
             generate_key(user_id.lower(), password.lower())[:20],
         )
         history = db.child("chat queue").child("queue").get(token=user["idToken"]).val()
-        return True, history
+        chat_attributes = history.values()
+        chat_queue_id = history.keys()
+        return True, [chat_queue_id, chat_attributes]
     except Exception as e:
         return False, e
 
