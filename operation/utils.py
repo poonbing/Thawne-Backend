@@ -1,5 +1,5 @@
 import pyrebase
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from utils.cryptography import generate_key
 
@@ -32,7 +32,7 @@ def create_chat(
     general_write=True,
 ):
     member_list = {}
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = (datetime.utcnow()+timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
     chat_id = (
         security_level[:1].upper()
         + str(uuid.uuid4().int)[:6]
