@@ -32,7 +32,7 @@ def default():
 def initiate_login():
     user_id = request.get('userId')
     password = request.get('pass')
-    status, message = login_check(user_id, password)
+    status, _ = login_check(user_id, password)
     if status:
         return redirect(url_for("load_log_queue", request={'userId':user_id, 'pass':password}))
 
@@ -69,7 +69,8 @@ def resolve_chat_requests(id):
         flash(f'Something went wrong.')
         return redirect(url_for('load_chat_requests'))
     
-@app.route("/users", methods=["POST"])
+
+@app.route("/users", methods=["GET","POST"])
 def load_user_augment_requests():
     user_id = request.get('userId')
     password = request.get('pass')
@@ -77,7 +78,8 @@ def load_user_augment_requests():
     if status:
         return render_template("user_log.html", requests=message)
 
-@app.route("/chat/resolve", methods=["POST"])
+
+@app.route("/chat/resolve", methods=["GET","POST"])
 def resolve_user_augment_requests():
     user_id = request.get('userId')
     password = request.get('pass')

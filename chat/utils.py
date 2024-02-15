@@ -1,7 +1,7 @@
 import pyrebase
 from utils.cryptography import generate_key, encrypt_data, decrypt_data
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 import nltk
 import joblib
 import firebase_admin
@@ -119,7 +119,7 @@ def text_scanning(text):
             
 def save_message(user_id, chat_id, security_level, password, message_content, file=False, filename=False, file_security=False, file_password=False):
     print("yes")
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = (datetime.utcnow()+timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
     check, status = verify_chat_user(user_id, chat_id, security_level, password)
     if not check:
         return False, status

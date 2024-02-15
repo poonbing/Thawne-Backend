@@ -1,5 +1,5 @@
 import pyrebase
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from utils.cryptography import generate_key
 
@@ -32,7 +32,7 @@ def create_chat(
     general_write=True,
 ):
     member_list = {}
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = (datetime.utcnow()+timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
     chat_id = (
         security_level[:1].upper()
         + str(uuid.uuid4().int)[:6]
@@ -145,9 +145,9 @@ def queue_chat_request(
     password,
     action,
     chat_name,
-    chat_description,
-    security_level,
-    list_of_users,
+    chat_description=False,
+    security_level=False,
+    list_of_users=False,
     general_read=True,
     general_write=True,
 ):
@@ -366,5 +366,27 @@ def retrieve_user_augment_queue(user_id, password):
         )
         history = db.child("user augment queue").child("queue").get(token=user["idToken"]).val()
         return True, history
+    except Exception as e:
+        return False, e
+    
+def reject_chat_queue(user_id, password, request_id):
+    try:
+        user = auth.sign_in_with_email_and_password(
+                user_id.lower() + "@thawne.com",
+                generate_key(user_id.lower(), password.lower())[:20],
+            )
+        db.child("chat queue").child("queue").child(request_id).remove(token=user["idToken"])
+        return True, "Request rejected"
+    except Exception as e:
+        return False, e
+    
+def reject_user_queue(user_id, password, request_id):
+    try:
+        user = auth.sign_in_with_email_and_password(
+                user_id.lower() + "@thawne.com",
+                generate_key(user_id.lower(), password.lower())[:20],
+            )
+        db.child("user augment queue").child("queue").child(request_id).remove(token=user["idToken"])
+        return True, "Request rejected"
     except Exception as e:
         return False, e

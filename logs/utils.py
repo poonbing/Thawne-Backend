@@ -1,5 +1,5 @@
 import pyrebase
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.cryptography import generate_key
 
 firebase_config = {
@@ -19,7 +19,7 @@ auth = firebase.auth()
 db = firebase.database()
 
 def log_event(user_id, password, type_of_offense, location, context):
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = (datetime.utcnow()+timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
     user = auth.sign_in_with_email_and_password(user_id.lower()+"@thawne.com", generate_key(user_id.lower(), password.lower())[:20])
     if not user:
         return False, "Incorrect User information, please retry."
