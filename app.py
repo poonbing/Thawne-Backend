@@ -45,7 +45,7 @@ def load_log_queue():
     status, message = retrieve_log_queue(user_id, password)
     if status:
         return render_template("logs.html", logs=message)
-    
+
 
 @app.route("/chats", methods=["POST"])
 def load_chat_requests():
