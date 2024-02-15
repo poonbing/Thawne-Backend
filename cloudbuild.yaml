@@ -1,7 +1,14 @@
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
-      ["build", "-t", "gcr.io/thawne-d1541/thawne-backend:${SHORT_SHA}", "."]
+      [
+        "build",
+        "-t",
+        "gcr.io/thawne-d1541/thawne-backend:${SHORT_SHA}",
+        "-t",
+        "gcr.io/thawne-d1541/thawne-backend:latest",
+        ".",
+      ]
 
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/thawne-d1541/thawne-backend"]
