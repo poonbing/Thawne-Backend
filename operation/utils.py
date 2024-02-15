@@ -145,9 +145,9 @@ def queue_chat_request(
     password,
     action,
     chat_name,
-    chat_description,
-    security_level,
-    list_of_users,
+    chat_description=False,
+    security_level=False,
+    list_of_users=False,
     general_read=True,
     general_write=True,
 ):
