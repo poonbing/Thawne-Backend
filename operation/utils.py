@@ -199,7 +199,9 @@ def queue_chat_request(
                 request[request_count]["request_user"] = username
                 request[request_count]["request_user_id"] = user_id
             elif action == "Delete":
-                pass
+                request[request_count]["request_id"] = request_count
+                request[request_count]["request_user"] = username
+                request[request_count]["request_user_id"] = user_id
             db.child("chat queue").child("queue").update(request, token=user["idToken"])
             db.child("chat queue").child("queue_count").set(
                 queue_count, token=user["idToken"]
