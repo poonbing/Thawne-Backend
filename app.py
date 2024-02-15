@@ -24,11 +24,11 @@ socketio.on_namespace(LogsNamespace("/log"))
 socketio.on_namespace(FileScanNamespace("/filescan"))
 
 
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["GET", "POST"])
 def default():
-    return render_template("index.html")
+    return render_template("layout.html")
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def initiate_login():
     user_id = request.get('userId')
     password = request.get('pass')
@@ -36,15 +36,15 @@ def initiate_login():
     if status:
         return redirect(url_for("load_log_queue", request={'userId':user_id, 'pass':password}))
 
-@app.route("/viewlogs", methods=["POST"])
+@app.route("/viewlogs", methods=["GET", "POST"])
 def load_log_queue():
-    user_id = request.get('userId')
-    password = request.get('pass')
-    status, message = retrieve_log_queue(user_id, password)
+    # user_id = request.get('userId')
+    # password = request.get('pass')
+    status, message = retrieve_log_queue("UM77682", "poonbing@root")
     if status:
         return render_template("logs.html", logs=message)
     
-@app.route("/chats", methods=["POST"])
+@app.route("/chats", methods=["GET", "POST"])
 def load_chat_requests():
     # user_id = request.get('userId')
     # password = request.get('pass')
@@ -61,9 +61,9 @@ def resolve_chat_requests(id):
     # user_id = request.get('userId')
     # password = request.get('pass')
     # request_id = request.get('reqId')
-    status, _ = resolve_chat_queue("UM77682", "poonbing@root", id)
+    status, message = resolve_chat_queue("UM77682", "poonbing@root", id)
     if status:
-        flash(f'Chat with id {id} has been created')
+        flash(f"{message}")
         return redirect(url_for('load_chat_requests'))
     else:
         flash(f'Something went wrong.')
@@ -88,4 +88,4 @@ def resolve_user_augment_requests():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app)
+    socketio.run(app=app, debug=True)

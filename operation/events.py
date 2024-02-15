@@ -26,8 +26,9 @@ class OperationNamespace(Namespace):
             emit('error_chat_creation', str(e))
 
     
-    def on_delete_chat(data):
-        status, message = queue_chat_request(data.get("userId"), data.get("password"), data.get("chatId"))
+    def on_delete_chat(self, data):
+        action = "Delete"
+        status, message = queue_chat_request(data.get("userId"), data.get("password"), chat_name=data.get("chatId"), action=action)
         # message = encrypt_data(json.dumps(message))
         if status:
             emit('return_delete_chat', message)
