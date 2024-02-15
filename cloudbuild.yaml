@@ -1,23 +1,22 @@
 steps:
-  - name: "python:3.8.2-slim"
-    entrypoint: "bash"
+  - name: gcr.io/cloud-builders/docker
     args:
-      - "-c"
-      - |
-        apt-get update && \
-        apt-get install -y \
-          build-essential \
-          libpq-dev && \
-        pip install --upgrade pip && \
-        pip install --no-cache-dir -r requirements.txt
-        chmod +x app.py
+      ["build", "-t", "gcr.io/$PROJECT_ID/${_SERVICE_NAME}:${SHORT_SHA}", "."]
 
-  - name: "gcr.io/thawne-d1541/thawne-backend"
-    entrypoint: "bash"
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/${_SERVICE_NAME}"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
     args:
-      - "-c"
-      - |
-        exec gunicorn --bind :5000 --workers 1 --threads 8 --timeout 0 app:app
-
-options:
-  logging: CLOUD_LOGGING_ONLY
+      [
+        "run",
+        "deploy",
+        "${_SERVICE_NAME}",
+        "--image",
+        "gcr.io/$PROJECT_ID/${_SERVICE_NAME}:${SHORT_SHA}",
+        "--region",
+        "us-central1",
+        "--platform",
+        "managed",
+        "--allow-unauthenticated",
+      ]
