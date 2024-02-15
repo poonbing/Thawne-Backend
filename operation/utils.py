@@ -368,3 +368,25 @@ def retrieve_user_augment_queue(user_id, password):
         return True, history
     except Exception as e:
         return False, e
+    
+def reject_chat_queue(user_id, password, request_id):
+    try:
+        user = auth.sign_in_with_email_and_password(
+                user_id.lower() + "@thawne.com",
+                generate_key(user_id.lower(), password.lower())[:20],
+            )
+        db.child("chat queue").child("queue").child(request_id).remove(token=user["idToken"])
+        return True, "Request rejected"
+    except Exception as e:
+        return False, e
+    
+def reject_user_queue(user_id, password, request_id):
+    try:
+        user = auth.sign_in_with_email_and_password(
+                user_id.lower() + "@thawne.com",
+                generate_key(user_id.lower(), password.lower())[:20],
+            )
+        db.child("user augment queue").child("queue").child(request_id).remove(token=user["idToken"])
+        return True, "Request rejected"
+    except Exception as e:
+        return False, e
