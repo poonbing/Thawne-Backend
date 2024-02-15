@@ -11,7 +11,7 @@ steps:
       ]
 
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/thawne-d1541/thawne-backend"]
+    args: ["push", "gcr.io/thawne-d1541/thawne-backend:${SHORT_SHA}"]
 
   - name: "gcr.io/cloud-builders/gcloud"
     args:
