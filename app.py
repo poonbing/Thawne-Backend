@@ -28,6 +28,7 @@ socketio.on_namespace(FileScanNamespace("/filescan"))
 def default():
     return render_template("index.html")
 
+
 @app.route("/login", methods=["POST"])
 def initiate_login():
     user_id = request.get('userId')
@@ -35,6 +36,7 @@ def initiate_login():
     status, message = login_check(user_id, password)
     if status:
         return redirect(url_for("load_log_queue", request={'userId':user_id, 'pass':password}))
+
 
 @app.route("/viewlogs", methods=["POST"])
 def load_log_queue():
@@ -44,6 +46,7 @@ def load_log_queue():
     if status:
         return render_template("logs.html", logs=message)
     
+
 @app.route("/chats", methods=["POST"])
 def load_chat_requests():
     # user_id = request.get('userId')
@@ -69,6 +72,7 @@ def resolve_chat_requests(id):
         flash(f'Something went wrong.')
         return redirect(url_for('load_chat_requests'))
     
+
 @app.route("/users", methods=["POST"])
 def load_user_augment_requests():
     user_id = request.get('userId')
@@ -76,6 +80,7 @@ def load_user_augment_requests():
     status, message = retrieve_user_augment_queue(user_id, password)
     if status:
         return render_template("user_log.html", requests=message)
+
 
 @app.route("/chat/resolve", methods=["POST"])
 def resolve_user_augment_requests():
