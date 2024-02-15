@@ -163,6 +163,7 @@ def queue_chat_request(
             .get(token=user["idToken"])
             .val()
         )
+        print(level)
         if level != "user":
             try:
                 request_count = (
@@ -199,6 +200,7 @@ def queue_chat_request(
                 request[request_count]["request_user"] = username
                 request[request_count]["request_user_id"] = user_id
             elif action == "Delete":
+                print('adding')
                 request[request_count]["request_id"] = request_count
                 request[request_count]["request_user"] = username
                 request[request_count]["request_user_id"] = user_id
