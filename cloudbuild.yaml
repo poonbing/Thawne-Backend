@@ -10,6 +10,7 @@ steps:
           libpq-dev && \
         pip install --upgrade pip && \
         pip install --no-cache-dir -r requirements.txt
+        chmod +x app.py
 
   - name: "gcr.io/thawne-d1541/thawne-backend"
     entrypoint: "bash"
