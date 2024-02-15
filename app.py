@@ -33,7 +33,7 @@ def default():
 def initiate_login():
     user_id = request.get('userId')
     password = request.get('pass')
-    status, message = login_check(user_id, password)
+    status, _ = login_check(user_id, password)
     if status:
         return redirect(url_for("load_log_queue", request={'userId':user_id, 'pass':password}))
 
