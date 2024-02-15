@@ -1,0 +1,19 @@
+steps:
+  - name: "python:3.8.2-slim"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        apt-get update && \
+        apt-get install -y \
+          build-essential \
+          libpq-dev && \
+        pip install --upgrade pip && \
+        pip install --no-cache-dir -r requirements.txt
+
+  - name: "gcr.io/thawne-d1541/thawne-backend"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        exec gunicorn --bind :5000 --workers 1 --threads 8 --timeout 0 app:app

@@ -12,6 +12,4 @@ COPY . ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN ln -sf /dev/stdout server.log && ln -sf /dev/stderr /server.log
-
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
