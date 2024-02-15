@@ -124,7 +124,7 @@ def delete_chat(user_id, password, chat_id):
             .child("level")
             .get(user["idToken"])
             .val()
-            == "Master"
+            == "master"
         ):
             user_list = db.child("users").get(user["idToken"]).val()
             for uid in user_list:
