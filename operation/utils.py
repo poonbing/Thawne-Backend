@@ -233,7 +233,7 @@ def resolve_chat_queue(user_id, password, request_id):
         )
         if request["action"] == "Create":
             state, message = create_chat(
-                user_id,
+                request["request_user_id"],
                 password,
                 chat_name=request["chat_name"],
                 chat_description=request["chat_description"],

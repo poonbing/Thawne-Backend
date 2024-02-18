@@ -40,7 +40,9 @@ def initiate_login():
 def load_log_queue():
     # user_id = request.get('userId')
     # password = request.get('pass')
-    status, message = retrieve_log_queue("UM77682", "poonbing@root")
+    user_id = "UM77682"
+    password = "poonbing@root"
+    status, message = retrieve_log_queue(user_id, password)
     if status:
         return render_template("logs.html", logs=message)
     
@@ -48,7 +50,9 @@ def load_log_queue():
 def load_chat_requests():
     # user_id = request.get('userId')
     # password = request.get('pass')
-    status, message = retrieve_chat_queue("UM77682", "poonbing@root")
+    user_id = "UM77682"
+    password = "poonbing@root"
+    status, message = retrieve_chat_queue(user_id, password)
     print(message)
 
     chat_attributes = message
@@ -60,8 +64,9 @@ def load_chat_requests():
 def resolve_chat_requests(id): 
     # user_id = request.get('userId')
     # password = request.get('pass')
-    # request_id = request.get('reqId')
-    status, message = resolve_chat_queue("UM77682", "poonbing@root", id)
+    user_id = "UM77682"
+    password = "poonbing@root"
+    status, message = resolve_chat_queue(user_id, password, id)
     if status:
         flash(f"{message}")
         return redirect(url_for('load_chat_requests'))
@@ -79,12 +84,11 @@ def load_user_augment_requests():
         return render_template("user_log.html", requests=message)
 
 
-@app.route("/chat/resolve", methods=["GET","POST"])
-def resolve_user_augment_requests():
+@app.route("/user/resolve/<string:id>", methods=["GET","POST"])
+def resolve_user_augment_requests(id):
     user_id = request.get('userId')
     password = request.get('pass')
-    request_id = request.get('reqId')
-    status, _ = resolve_augment_user(user_id, password, request_id)
+    status, _ = resolve_augment_user(user_id, password, id)
     if status:
         return redirect(url_for('load_user_augment_requests', request={'userId':user_id, 'pass':password}))
 
