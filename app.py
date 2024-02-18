@@ -9,13 +9,15 @@ from operation.utils import retrieve_chat_queue, resolve_chat_queue, retrieve_us
 from logs.events import LogsNamespace
 from logs.utils import retrieve_log_queue
 from file_scan.events import FileScanNamespace
+from report.utils import DataLayer, send_report
 
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
+# datalayer = DataLayer("UM77682", "poonbing@root")
+# send_report()
 
 socketio.on_namespace(AuthenticateNamespace("/auth"))
 socketio.on_namespace(ChatNamespace("/chat"))
@@ -91,6 +93,13 @@ def resolve_user_augment_requests(id):
     status, _ = resolve_augment_user(user_id, password, id)
     if status:
         return redirect(url_for('load_user_augment_requests', request={'userId':user_id, 'pass':password}))
+    
+# @app.route("/logs")
+# def table():
+#     # full_url = request.url_root + url_for('table').lstrip('/')
+#     full_url = None
+#     return(datalayer.Render_List_Of_Dict_To_Html(datalayer._list_of_dict,
+#                                                  full_url))
 
 
 if __name__ == "__main__":
